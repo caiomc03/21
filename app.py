@@ -1,4 +1,3 @@
-import seaborn as sns
 import time  # to simulate a real time data, time loop
 
 import numpy as np  # np mean, np random
@@ -7,7 +6,7 @@ import plotly.express as px  # interactive charts
 import streamlit as st  # 🎈 data web app development
 import matplotlib.pyplot as plt  # for bar plot
 
-dataset_url = "C:/Users/caiom/Desktop/21/datacsv.csv"
+dataset_url = "https://caiomc03bucket.blob.core.windows.net/cont/datacsv.csv"
 
 st.set_page_config(
     page_title="Real-Time Data Science Dashboard",
