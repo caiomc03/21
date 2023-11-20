@@ -6,9 +6,6 @@ import seaborn as sns
 from faker import Faker
 import datetime as dt
 import random
-import folium
-from folium.plugins import HeatMap
-from geopy.geocoders import Nominatim
 
 st.set_page_config(
     page_title="Dashboard",
@@ -171,3 +168,5 @@ clientes['Classificacao_Lead'] = clientes.apply(classificar_lead, axis=1)
 
 #Fim da criação do dataframe de clientes fake
 #===========================================================================
+
+

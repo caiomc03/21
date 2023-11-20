@@ -37,7 +37,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-st.title("21.AI Dashboard - Imóveis")
+st.title(":grey[21.AI Dashboard - Imóveis]")
 placeholder = st.empty()
 
 #===============================================================================================
@@ -147,7 +147,7 @@ fig_col1, fig_col2, fig_col3= st.columns(3)
 #Primeira linha do dashboard
 
 with fig_col1:
-    st.markdown("### Imoveis a venda")
+    st.markdown("### :grey[Imoveis a venda]")
    
     # Calculating the total number of properties and the percentage of those that are sold
     total_properties = len(imoveis_para_venda)
@@ -157,7 +157,7 @@ with fig_col1:
     # Data to plot
     labels = ['Vendido', 'Disponível']
     data = [percent_sold, 100-percent_sold]
-    colors = ['#283c54', '#ADD8E6']
+    colors = ['#283c54', '#9ba8a8']
     
 
     # Plotting the data
@@ -184,7 +184,7 @@ with fig_col1:
     st.pyplot(fig)
 
 with fig_col2:
-    st.markdown("### Imoveis Alugados")
+    st.markdown("### :grey[Imoveis Alugados]")
 
     # Calculating the total number of properties and the percentage of those that are sold
     total_properties = len(imoveis_para_alugar)
@@ -194,7 +194,7 @@ with fig_col2:
     # Data to plot
     labels = ['Alugado', 'Vago']
     data = [percent_rent, 100-percent_rent]
-    colors = ['#283c54', '#ADD8E6']   # Gold for sold, Light blue for available
+    colors = ['#289c84', '#9ba8a8']   # Gold for sold, Light blue for available
 
     # Plotting the data
     fig, ax = plt.subplots()
@@ -220,7 +220,7 @@ with fig_col2:
     st.pyplot(fig)  
 
 with fig_col3:
-    st.markdown("### Disponibilidade de Imóveis")
+    st.markdown("### :grey[Disponibilidade de Imóveis]")
    
     # Then, we calculate the counts for each category.
     disponiveis_para_venda = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Casa'])
@@ -229,7 +229,7 @@ with fig_col3:
     # Now we create the pie chart data.
     labels = ['Disponíveis para Venda', 'Disponíveis para Alugar']
     sizes = [disponiveis_para_venda, disponiveis_para_alugar]
-    colors = ['#283c54', '#ADD8E6']  # Gold for sale, Sky blue for rent
+    colors = ['#289c84','#283c54']  # Gold for sale, Sky blue for rent
 
     # Plotting the pie chart.
     fig, ax = plt.subplots()
@@ -253,7 +253,7 @@ with fig_col3:
 #=================================================================================================
 #Segunda linha do dashboard
 
-st.markdown("### Vendas ao longo do ano")
+st.markdown("### :grey[Vendas ao longo do ano]")
 monthly_sales = imoveis[imoveis['vendido'] == 1].groupby(imoveis['sold_date'].dt.to_period('M'))['precoVenda'].sum().reset_index()
 monthly_sales['sold_date'] = monthly_sales['sold_date'].dt.to_timestamp()
 
@@ -304,7 +304,8 @@ ax = plt.gca()
 ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x/1000000))))
 
 # Show legend
-plt.legend()
+plt.legend(labels=[f'Metas Mensais',f'Soma das Vendas'], 
+        loc='lower right')
 
 # Show grid on y axes only
 plt.grid(axis='y', alpha=0.5, linestyle='--')
@@ -315,7 +316,7 @@ st.pyplot(fig)
 #Terceira linha do dashboard
 fig_col1, fig_col2= st.columns(2)
 with fig_col1:
-    st.markdown("### Vendas do Quarter Atual")
+    st.markdown("### :grey[Vendas do Quarter Atual]")
 
     # Calcular as vendas totais por quarter
     vendas_por_quarter = imoveis[imoveis['vendido'] == 1].groupby(imoveis['sold_date'].dt.to_period('Q'))['precoVenda'].sum()
@@ -346,7 +347,7 @@ with fig_col1:
 
     # Plotando o gráfico
     fig, ax = plt.subplots()
-    plt.text(0.5, 0.6, simplified_current_sales, ha='center', va='center', fontsize=18, color='blue')
+    plt.text(0.5, 0.6, simplified_current_sales, ha='center', va='center', fontsize=18, color='#283c54', fontweight='bold')
     plt.text(0.5, 0.4, f'{proportional_difference_str} com Relação ao Quarter Passado', ha='center', va='center', fontsize=14, color='red')
     plt.axis('off')
     fig.patch.set_facecolor('#d8e4e4')
@@ -359,7 +360,7 @@ with fig_col1:
 
 with fig_col2:
 
-    st.markdown("### Renda Acumulada dos Imóveis Alugados")
+    st.markdown("### :grey[Renda Acumulada dos Imóveis Alugados]")
     total_rental_income = imoveis[imoveis['alugado'] == 1]['precoAluguel'].sum()
 
 
@@ -369,7 +370,7 @@ with fig_col2:
 
     # Plotando a renda total de aluguel como um único número
     fig, ax = plt.subplots()
-    plt.text(0.5, 0.5, simplified_rental_income, ha='center', va='center', fontsize=20, color='blue')
+    plt.text(0.5, 0.5, simplified_rental_income, ha='center', va='center', fontsize=20, color='#283c54', fontweight='bold')
     plt.axis('off')  # Desligar o eixo
     fig.patch.set_facecolor('#d8e4e4')
     fig.set_linewidth(4)
