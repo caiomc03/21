@@ -159,26 +159,32 @@ with fig_col1:
 
     # Plotting the data
     fig, ax = plt.subplots()
+    fig.set_linewidth(2)
     ax.set_facecolor('#d8e4e4')
-    ax.pie(x=data, explode=None, labels=labels, colors=colors,
-    autopct=None, shadow=True,startangle=140, )
- 
+    ax.pie(x=data, explode=None, labels=labels, colors=colors, startangle=140)
+
     # Creating a doughnut chart by setting a circle at the center again
     circle = plt.Circle((0,0), 0.70, color='#d8e4e4')
 
     fig.gca().add_artist(circle)  # Adding the white circle in the middle
     fig.patch.set_facecolor('#d8e4e4')
-    
+
     # Moving the legend to the bottom right corner
-    plt.legend(labels=['Vendido: ' + str(sold_properties), 'Disponível: ' + str(total_properties - sold_properties)], 
+    plt.legend(labels=['Vendido: ' + str(sold_properties), 'Disponível: ' + str(total_properties - sold_properties)],
             title='Imóveis à venda: ' + str(total_properties),
-            loc='lower right')
+            loc='upper right')
 
     plt.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
-    plt.annotate('{:.2f}%'.format(percent_sold), (-0.2,0), fontsize=16, fontweight='bold')
+    plt.annotate('{:.2f}%'.format(percent_sold), (-0.2, 0), fontsize=16, fontweight='bold')
+
+    # Add a border around the figure
+    # fig.gca().spines['top'].set_visible(True)
+    # fig.gca().spines['bottom'].set_visible(True)
+    # fig.gca().spines['left'].set_visible(True)
+    # fig.gca().spines['right'].set_visible(True)
 
 
-    st.pyplot(fig)    
+    st.pyplot(fig)
 
 with fig_col2:
     st.markdown("### Imoveis Alugados")
