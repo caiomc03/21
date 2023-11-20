@@ -210,6 +210,6 @@ with fig_col1:
     # plt.tight_layout()
 
     # Exibir o gráfico
-    plt.show()
+    st.pyplot(fig)
 
 
