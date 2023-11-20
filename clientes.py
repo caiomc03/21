@@ -6,6 +6,7 @@ import seaborn as sns
 from faker import Faker
 import datetime as dt
 import random
+import seaborn as sns
 
 st.set_page_config(
     page_title="Dashboard",
@@ -175,6 +176,7 @@ fig_col1, fig_col2 = st.columns(2)
 #Primeira linha do dashboard
 
 with fig_col1:
+    st.markdown('### :grey[Proporção Leads e Vendas Mensais]')
     # Supondo que 'clientes' e 'imoveis' sejam seus DataFrames
 
     # Contar leads por mês
@@ -196,11 +198,16 @@ with fig_col1:
 
     # Criar o gráfico de barras com a proporção
     fig, ax = plt.subplots(figsize=(14,6))
-    plot_data[['Leads', 'Vendas']].plot(kind='bar', ax=ax)
-    plot_data['Proporção'].plot(kind='line', ax=ax, secondary_y=True, color='red', marker='o')
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    fig.set_figheight(7)
+
+
+    plot_data[['Leads', 'Vendas']].plot(kind='bar', ax=ax,colormap='Paired')
+    plot_data['Proporção'].plot(kind='line', ax=ax, secondary_y=True, color='#289c84', marker='o')
 
     # Configurações do gráfico
-    ax.set_title('Proporção Leads e Vendas Mensais')
     ax.set_xlabel('Mês (Ano, Mês)')
     ax.set_ylabel('Quantidade de Vendas')
     ax.right_ax.set_ylabel('Proporção de Conversão (Vendas / Leads)')
@@ -213,6 +220,8 @@ with fig_col1:
     st.pyplot(fig)
 
 with fig_col2:
+    st.markdown('### :grey[Distribuição dos Preços dos Imóveis Anunciados]')
+
     # Filtrando imóveis que estão à venda e ainda não foram vendidos
     imoveis_a_venda = imoveis[(imoveis['vendido'] == 0) & (imoveis['Finalidade'] == 'Compra')]
 
@@ -221,14 +230,18 @@ with fig_col2:
 
     # Criando um histograma com uma linha KDE
     fig, ax = plt.subplots(figsize=(14,6))
-    ax.hist(imoveis_a_venda['precoVenda'], bins=30, color='skyblue', edgecolor='black')
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    fig.set_figheight(6.5)
+    ax.hist(imoveis_a_venda['precoVenda'], bins=30, color='#289c84', edgecolor='black')
     
     # Adicionando a legenda com a quantidade de imóveis
     plt.text(x=max(imoveis_a_venda['precoVenda']), y=0.9*plt.gca().get_ylim()[1], s=f'Total de Imóveis: {total_imoveis}', 
             horizontalalignment='right', fontsize=20, color='black')
 
     # Configurando título e eixos
-    plt.title('Distribuição dos Preços de Venda dos Imóveis Anunciados')
+
     plt.xlabel('Preço de Venda')
     plt.ylabel('Quantidade')
     plt.grid(False)
@@ -240,7 +253,10 @@ fig_col1, fig_col2, fig_col3, fig_col4 = st.columns(4)
 #===========================================================================
 #Segunda linha do dashboard
 with fig_col1:
-        # Obter o quarter atual
+
+    st.markdown('### :grey[Leads do Quarter Atual]')
+
+    # Obter o quarter atual
     current_quarter = pd.Timestamp.now().quarter
     current_year = pd.Timestamp.now().year
 
@@ -267,15 +283,20 @@ with fig_col1:
 
     # Criando o gráfico para exibir a quantidade de lead    s do quarter atual e a diferença
     fig, ax = plt.subplots(figsize=(4,2))
-    plt.text(0.5, 0.6, f'{qtd_leads_current_quarter}', ha='center', va='center', fontsize=40, color='blue')
-    plt.text(0.5, 0.4, f'{diferenca} em Comparação ao Anterior', ha='center', va='center', fontsize=14, color='red' if diferenca < 0 else 'green')
-    plt.title('Leads do Quarter Atual')
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    plt.text(0.5, 0.6, f'{qtd_leads_current_quarter}', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
+    plt.text(0.5, 0.2, f'{diferenca} em Comparação ao Anterior', ha='center', va='center', fontsize=14, color='red' if diferenca < 0 else 'green')
     plt.axis('off')  # Desligar o eixo
     fig.savefig('current_quarter_leads.png')  # Save the figure as an image
     st.image('current_quarter_leads.png') 
 
 with fig_col2:
-        # Definindo custos de marketing e vendas (exemplo)
+    
+    st.markdown('### :grey[CAC Atual]')
+        
+    # Definindo custos de marketing e vendas (exemplo)
     custo_marketing_vendas = 100000  # Exemplo: R$100.000 por mês
 
     # Data atual e data do mês anterior
@@ -292,15 +313,20 @@ with fig_col2:
 
     # Plotando o valor do CAC atual e a comparação com o mês anterior
     fig, ax = plt.subplots(figsize=(4,2))
-    plt.text(0.5, 0.6, f'R${CAC_atual:.2f}', ha='center', va='center', fontsize=40, color='blue')
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    plt.text(0.5, 0.6, f'R${CAC_atual:.2f}', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
     diferenca_CAC = CAC_atual - CAC_anterior
-    plt.text(0.5, 0.4, f'R${diferenca_CAC:.2f} Mais Caro que no Mês Passado' if diferenca_CAC >  0 else f'R${diferenca_CAC:.2f} Mais Barato que no Mês Passado'  , ha='center', va='center', fontsize=14, color='red' if diferenca_CAC >  0 else 'green')
-    plt.title('CAC Atual')
+    plt.text(0.5, 0.2, f'R${diferenca_CAC:.2f} Mais Caro que no Mês Passado' if diferenca_CAC >  0 else f'R${diferenca_CAC:.2f} Mais Barato que no Mês Passado'  , ha='center', va='center', fontsize=14, color='red' if diferenca_CAC >  0 else 'green')
     plt.axis('off')  # Desligar o eixo
     fig.savefig('last_month_CAC.png')  # Save the figure as an image
     st.image('last_month_CAC.png') 
 
 with fig_col3:
+
+    st.markdown('### :grey[ROAS]')
+
     # Suponha que 'clientes' e 'imoveis' sejam seus DataFrames
     custo_marketing_vendas = 60000000  # Exemplo: R$100.000 por mês
 
@@ -317,14 +343,19 @@ with fig_col3:
 
     # Plotando o valor do ROI atual e a comparação com o mês anterior
     fig, ax = plt.subplots(figsize=(4,2))
-    plt.text(0.5, 0.6, f'{ROI_atual:.2f}%', ha='center', va='center', fontsize=40, color='blue')
-    plt.text(0.5, 0.4, f'{abs(ROI_atual - ROI_anterior):.2f}% Menor que Mês Passado' if ROI_atual - ROI_anterior <  0 else f'R${ROI_atual - ROI_anterior:.2f} Maior que Mês Passado', ha='center', va='center', fontsize=14, color='red' if ROI_atual - ROI_anterior < 0 else 'green')
-    plt.title('ROAS')
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    plt.text(0.5, 0.6, f'{ROI_atual:.2f}%', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
+    plt.text(0.5, 0.2, f'{abs(ROI_atual - ROI_anterior):.2f}% Menor que Mês Passado' if ROI_atual - ROI_anterior <  0 else f'R${ROI_atual - ROI_anterior:.2f} Maior que Mês Passado', ha='center', va='center', fontsize=14, color='red' if ROI_atual - ROI_anterior < 0 else 'green')
     plt.axis('off')
     fig.savefig('ROAS.png')  # Save the figure as an image
     st.image('ROAS.png') 
 
 with fig_col4:
+
+    st.markdown('### :grey[Tempo Médio Anunciado]')
+
     # Revisando as datas para garantir que 'data_anuncio' é anterior a 'sold_date'
     # e calculando a diferença de dias apenas para imóveis vendidos
     imoveis['Days_On_Market'] = imoveis.apply(lambda row: (row['sold_date'] - row['data_anuncio']).days if row['vendido'] == 1 and row['data_anuncio'] <= row['sold_date'] else np.nan, axis=1)
@@ -335,8 +366,10 @@ with fig_col4:
 
     # Plotting the average Days On Market
     fig, ax = plt.subplots(figsize=(4,2))
-    plt.text(0.5, 0.6, f'{average_days_on_market} dias', ha='center', va='center', fontsize=40, color='blue')
-    plt.title('Tempo Médio de Imóveis Anunciados')
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    plt.text(0.5, 0.6, f'{average_days_on_market} dias', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
     plt.axis('off')
     fig.savefig('anoucement_time.png')  # Save the figure as an image
     st.image('anoucement_time.png') 
@@ -353,6 +386,9 @@ fig_col1, fig_col2, fig_col3 = st.columns(3)
 #Terceira linha do dashboard
 
 with fig_col1:
+
+    st.markdown('### :grey[Leads por Origem - Quarter Atual]')
+
     quarter_atual = pd.Timestamp.now().quarter
 
     # Filtrar os dados para o quarter atual
@@ -362,12 +398,16 @@ with fig_col1:
     leads_por_origem = leads_quarter_atual['Origem'].value_counts()
 
     # Definir uma lista de cores
-    cores = ['blue', 'green', 'red', 'purple', 'orange', 'brown']
+    cores = ['#283c54', '#285460', '#286c6c', '#288478', '#289c84']
 
     # Criar o gráfico de barras horizontal com cores diferentes
     fig, ax = plt.subplots(figsize=(4,2))
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    fig.set_figwidth(6)
+    fig.set_figheight(5.8)
     leads_por_origem.plot(kind='barh', color=cores[:len(leads_por_origem)])
-    plt.title('Leads por Origem - Quarter Atual')
     plt.xlabel('Quantidade de Leads')
     plt.ylabel('Origem')
     plt.tight_layout()
@@ -376,6 +416,10 @@ with fig_col1:
     st.pyplot(fig)
 
 with fig_col2:
+
+    st.markdown('### :grey[Tipos de Leads - Quarter Atual]')
+
+
     # Filtrar dados para o quarter atual
     quarter_atual = pd.Timestamp.now().quarter
     leads_quarter_atual = clientes[clientes['lead_date'].dt.quarter == quarter_atual]
@@ -384,14 +428,31 @@ with fig_col2:
     contagem_leads = leads_quarter_atual['Classificacao_Lead'].value_counts()
 
     # Definir cores para cada tipo de lead
-    cores = ['red', 'orange', 'blue']
+    cores = ['#289c84', '#283c54', '#286c6c']
 
     # Criar gráfico de pizza aberto com as cores específicas
     fig, ax = plt.subplots(figsize=(4,2))
-    contagem_leads.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=cores, wedgeprops=dict(width=0.3))
-    plt.title('Proporção de Leads Quentes, Frios e Mornos - Quarter Atual')
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(2)
+    fig.set_edgecolor('#283c54')
+    fig.set_figheight(2)
+    contagem_leads.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=cores, wedgeprops=dict(width=0.3), textprops={'fontsize': 6})
     plt.ylabel('')  # Remover o label do eixo y
 
     st.pyplot(fig)  
+
+with fig_col3:
+    st.markdown('### :grey[Funil de Marketing]')
+
+    fig, ax = plt.subplots(figsize=(4,2))
+    fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    plt.text(0.5, 0.6, 'PLACEHOLDER', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
+    plt.axis('off')
+    fig.savefig('anoucement_time.png')  # Save the figure as an image
+    st.image('anoucement_time.png') 
+
+    
 
 
