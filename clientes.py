@@ -33,7 +33,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-st.title("21.AI Dashboard - Clientes")
+st.title(":grey[21.AI Dashboard - Clientes]")
 placeholder = st.empty()
 
 #===========================================================================
@@ -168,5 +168,48 @@ clientes['Classificacao_Lead'] = clientes.apply(classificar_lead, axis=1)
 
 #Fim da criação do dataframe de clientes fake
 #===========================================================================
+
+
+fig_col1, fig_col2= st.columns(2)
+#===========================================================================
+#Primeira linha do dashboard
+
+with fig_col1:
+    # Supondo que 'clientes' e 'imoveis' sejam seus DataFrames
+
+    # Contar leads por mês
+    leads_per_month = clientes['lead_date'].groupby([clientes['lead_date'].dt.year, clientes['lead_date'].dt.month]).count()
+
+    # Contar vendas por mês
+    sales_per_month = imoveis[imoveis['vendido'] == 1]['sold_date'].groupby([imoveis['sold_date'].dt.year, imoveis['sold_date'].dt.month]).count()
+
+    # Criar DataFrame para o gráfico
+    plot_data = pd.DataFrame({
+        'Leads': leads_per_month,
+        'Vendas': sales_per_month
+    })
+
+    # Preencher valores NaN com 0   
+    plot_data = plot_data.fillna(0)
+
+    plot_data['Proporção'] = np.where(plot_data['Leads'] > 0, (plot_data['Vendas'] / plot_data['Leads']) * 100, 0)
+
+    # Criar o gráfico de barras com a proporção
+    fig, ax = plt.subplots()
+    plot_data[['Leads', 'Vendas']].plot(kind='bar', ax=ax)
+    plot_data['Proporção'].plot(kind='line', ax=ax, secondary_y=True, color='red', marker='o')
+
+    # Configurações do gráfico
+    ax.set_title('Proporção Leads e Vendas Mensais')
+    ax.set_xlabel('Mês (Ano, Mês)')
+    ax.set_ylabel('Quantidade de Vendas')
+    ax.right_ax.set_ylabel('Proporção de Conversão (Vendas / Leads)')
+    plt.xticks(rotation=45)
+    ax.legend(loc='upper left')
+    ax.right_ax.legend(loc='upper right')
+    # plt.tight_layout()
+
+    # Exibir o gráfico
+    plt.show()
 
 
