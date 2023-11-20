@@ -1,11 +1,14 @@
 import time  # to simulate a real time data, time loop
+import matplotlib.pyplot as plt  # for bar plot
+import matplotlib.dates as mdates
+import datetime as dt
+from random import randint  # to generate random numbers
+
 import numpy as np  # np mean, np random
 import pandas as pd  # read csv, df manipulation
 import plotly.express as px  # interactive charts
 import streamlit as st  #  data web app development
-import matplotlib.pyplot as plt  # for bar plot
 from faker import Faker
-import datetime as dt
 
 
 st.set_page_config(
@@ -154,14 +157,15 @@ with fig_col1:
     # Data to plot
     labels = ['Vendido', 'Disponível']
     data = [percent_sold, 100-percent_sold]
-    colors = ['#283c54', '#D3D3D3']
+    colors = ['#283c54', '#ADD8E6']
     
 
     # Plotting the data
     fig, ax = plt.subplots()
-    fig.set_linewidth(2)
-    ax.set_facecolor('#d8e4e4')
-    ax.pie(x=data, explode=None, labels=labels, colors=colors, startangle=140)
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    fig.set_figheight(5)
+    ax.pie(x=data, explode=None, labels=labels, colors=colors, startangle=180)
 
     # Creating a doughnut chart by setting a circle at the center again
     circle = plt.Circle((0,0), 0.70, color='#d8e4e4')
@@ -177,13 +181,6 @@ with fig_col1:
     plt.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
     plt.annotate('{:.2f}%'.format(percent_sold), (-0.2, 0), fontsize=16, fontweight='bold')
 
-    # Add a border around the figure
-    # fig.gca().spines['top'].set_visible(True)
-    # fig.gca().spines['bottom'].set_visible(True)
-    # fig.gca().spines['left'].set_visible(True)
-    # fig.gca().spines['right'].set_visible(True)
-
-
     st.pyplot(fig)
 
 with fig_col2:
@@ -197,13 +194,16 @@ with fig_col2:
     # Data to plot
     labels = ['Alugado', 'Vago']
     data = [percent_rent, 100-percent_rent]
-    colors = ['#283c54', '#D3D3D3']   # Gold for sold, Light blue for available
+    colors = ['#283c54', '#ADD8E6']   # Gold for sold, Light blue for available
 
     # Plotting the data
     fig, ax = plt.subplots()
-    ax.pie(x=data, explode=None, labels=labels, colors=colors,
-    autopct=None, shadow=True,startangle=140, )
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    fig.set_figheight(5)
+    ax.pie(x=data, explode=None, labels=labels, colors=colors,startangle=180, )
     fig.patch.set_facecolor('#d8e4e4')
+
     # Creating a doughnut chart by setting a circle at the center again
     circle = plt.Circle((0,0), 0.70, color='#d8e4e4')
 
@@ -212,7 +212,7 @@ with fig_col2:
     # Moving the legend to the bottom right corner
     plt.legend(labels=['Alugado: ' + str(rent_properties), 'Vago: ' + str(total_properties - rent_properties)], 
             title='Imóveis para aluguel : ' + str(total_properties),
-            loc='lower right')
+            loc='upper right')
 
     plt.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
     plt.annotate('{:.2f}%'.format(percent_rent), (-0.2,0), fontsize=16, fontweight='bold')
@@ -225,7 +225,7 @@ with fig_col3:
     # Then, we calculate the counts for each category.
     disponiveis_para_venda = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Casa'])
     disponiveis_para_alugar = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Apartamento'])
-
+    disponiveis_total = disponiveis_para_venda + disponiveis_para_alugar
     # Now we create the pie chart data.
     labels = ['Disponíveis para Venda', 'Disponíveis para Alugar']
     sizes = [disponiveis_para_venda, disponiveis_para_alugar]
@@ -234,78 +234,88 @@ with fig_col3:
     # Plotting the pie chart.
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('#d8e4e4')
-    ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    fig.set_figheight(4.85)
+    ax.pie(sizes, labels=labels, colors=colors,startangle=180)
     plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
     # Moving the legend to the bottom right corner
-    plt.legend(labels=['Alugado: ' + str(rent_properties), 'Disponível: ' + str(total_properties - rent_properties)], 
-            title='Imóveis para Alugar: ' + str(total_properties),
-            loc='lower right')
+    plt.legend(labels=[f'Alugar: {disponiveis_para_alugar}',f'Vender: {disponiveis_para_venda}'], 
+            title='Propoção de imóveis\n disponíveis',
+            loc='upper left')
+    
+    plt.annotate('{:.2f}%'.format(disponiveis_para_alugar/disponiveis_total*100), (-0.2,0.4), fontsize=16, fontweight='bold')
+    plt.annotate('{:.2f}%'.format(disponiveis_para_venda/disponiveis_total*100), (-0.2,-0.4), fontsize=16, fontweight='bold')
 
     st.pyplot(fig)
 
-
-fig_col1, fig_col2, fig_col3= st.columns(3)
 #=================================================================================================
 #Segunda linha do dashboard
 
+st.markdown("### Vendas ao longo do ano")
+monthly_sales = imoveis[imoveis['vendido'] == 1].groupby(imoveis['sold_date'].dt.to_period('M'))['precoVenda'].sum().reset_index()
+monthly_sales['sold_date'] = monthly_sales['sold_date'].dt.to_timestamp()
+
+# Ajustar o DataFrame de metas para começar a partir do primeiro mês das vendas
+first_month_of_sales = monthly_sales['sold_date'].min()
+target_months = pd.date_range(start=first_month_of_sales, periods=len(monthly_sales), freq='MS')
+target_values = [1000000 + 500000 * i for i in range(len(target_months))]
+target_df = pd.DataFrame({'Month': target_months, 'Target': target_values})
+
+    # Adjusting the target data to start from the first month of the sales data
+# and setting the y-axis to show integer values
+
+# Get the first month of sales from the sales data
+first_month_of_sales = monthly_sales['sold_date'].min()
+
+# Generate the target months starting from the first month of sales
+target_months = pd.date_range(start=first_month_of_sales, periods=len(target_months), freq='MS')
+
+# Generate target values starting from 1 million
+target_values = [10000000 + 10000000 * randint(0,10) for i in range(len(target_months))]
+
+# Create the target DataFrame
+target_df = pd.DataFrame({'Month': target_months, 'Target': target_values})
+
+# Plot the bar chart for monthly sales and line chart for monthly targets
+fig, ax =plt.subplots()
+fig.patch.set_facecolor('#d8e4e4')
+fig.set_linewidth(4)
+fig.set_edgecolor('#283c54')
+fig.set_figwidth(15)
+
+# Bar chart for monthly sales
+ax.bar(monthly_sales['sold_date'], monthly_sales['precoVenda'], width=20, label='Soma das Vendas', color='#283c54')
+
+# Line chart for the targets
+plt.plot(target_df['Month'], target_df['Target'], marker='o', linestyle='-', label='Metas Mensais', color='#289c84')
+
+# Set title and labels
+# plt.title('Soma das Vendas Mensais x Metas Mensais')
+plt.ylabel('Soma das Vendas (em Milhoes de R$)')
+
+# Rotate x-axis labels for better readability
+plt.xticks(rotation=45)
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
+
+# Set y-axis to have integer values only
+ax = plt.gca()
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x/1000000))))
+
+# Show legend
+plt.legend()
+
+# Show grid on y axes only
+plt.grid(axis='y', alpha=0.5, linestyle='--')
+
+st.pyplot(fig)
+
+#=================================================================================================
+#Terceira linha do dashboard
+fig_col1, fig_col2= st.columns(2)
 with fig_col1:
-    st.markdown("### Vendas X Metas Mensais")
-    monthly_sales = imoveis[imoveis['vendido'] == 1].groupby(imoveis['sold_date'].dt.to_period('M'))['precoVenda'].sum().reset_index()
-    monthly_sales['sold_date'] = monthly_sales['sold_date'].dt.to_timestamp()
-
-    # Ajustar o DataFrame de metas para começar a partir do primeiro mês das vendas
-    first_month_of_sales = monthly_sales['sold_date'].min()
-    target_months = pd.date_range(start=first_month_of_sales, periods=len(monthly_sales), freq='MS')
-    target_values = [1000000 + 500000 * i for i in range(len(target_months))]
-    target_df = pd.DataFrame({'Month': target_months, 'Target': target_values})
-
-        # Adjusting the target data to start from the first month of the sales data
-    # and setting the y-axis to show integer values
-
-    # Get the first month of sales from the sales data
-    first_month_of_sales = monthly_sales['sold_date'].min()
-
-    # Generate the target months starting from the first month of sales
-    target_months = pd.date_range(start=first_month_of_sales, periods=len(target_months), freq='MS')
-
-    # Generate target values starting from 1 million
-    target_values = [1000000 + 500000 * i for i in range(len(target_months))]
-
-    # Create the target DataFrame
-    target_df = pd.DataFrame({'Month': target_months, 'Target': target_values})
-
-    # Plot the bar chart for monthly sales and line chart for monthly targets
-    fig, ax =plt.subplots()
-    fig.patch.set_facecolor('#d8e4e4')
-
-    # Bar chart for monthly sales
-    ax.bar(monthly_sales['sold_date'], monthly_sales['precoVenda'], width=20, label='Soma das Vendas', color='#283c54')
-
-    # Line chart for the targets
-    plt.plot(target_df['Month'], target_df['Target'], marker='o', linestyle='-', label='Metas Mensais', color='#289c84')
-
-    # Set title and labels
-    plt.title('Soma das Vendas Mensais x Metas Mensais')
-    plt.xlabel('Meses')
-    plt.ylabel('Soma das Vendas (em Milhões)')
-
-    # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45)
-
-    # Set y-axis to have integer values only
-    ax = plt.gca()
-    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x))))
-
-    # Show legend
-    plt.legend()
-
-    # Show grid
-    plt.grid(True)
-
-    st.pyplot(fig)
-
-with fig_col2:
+    st.markdown("### Vendas do Quarter Atual")
 
     # Calcular as vendas totais por quarter
     vendas_por_quarter = imoveis[imoveis['vendido'] == 1].groupby(imoveis['sold_date'].dt.to_period('Q'))['precoVenda'].sum()
@@ -338,13 +348,18 @@ with fig_col2:
     fig, ax = plt.subplots()
     plt.text(0.5, 0.6, simplified_current_sales, ha='center', va='center', fontsize=18, color='blue')
     plt.text(0.5, 0.4, f'{proportional_difference_str} com Relação ao Quarter Passado', ha='center', va='center', fontsize=14, color='red')
-    plt.title('Vendas do Quarter Atual')
     plt.axis('off')
     fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    fig.set_figheight(3)
+
     fig.savefig('quarter_sales.png')  # Save the figure as an image
     st.image('quarter_sales.png')  # Display the saved image
 
-with fig_col3:
+with fig_col2:
+
+    st.markdown("### Renda Acumulada dos Imóveis Alugados")
     total_rental_income = imoveis[imoveis['alugado'] == 1]['precoAluguel'].sum()
 
 
@@ -355,8 +370,10 @@ with fig_col3:
     # Plotando a renda total de aluguel como um único número
     fig, ax = plt.subplots()
     plt.text(0.5, 0.5, simplified_rental_income, ha='center', va='center', fontsize=20, color='blue')
-    plt.title('Renda Acumulada Mensal dos Imóveis Alugados (acumulados ao longo do ano)')
     plt.axis('off')  # Desligar o eixo
     fig.patch.set_facecolor('#d8e4e4')
+    fig.set_linewidth(4)
+    fig.set_edgecolor('#283c54')
+    fig.set_figheight(3)
     fig.savefig('quarter_renting_sales.png')  # Save the figure as an image
     st.image('quarter_renting_sales.png') 
