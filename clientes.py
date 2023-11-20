@@ -170,7 +170,7 @@ clientes['Classificacao_Lead'] = clientes.apply(classificar_lead, axis=1)
 #===========================================================================
 
 
-fig_col1, fig_col2= st.columns(2)
+fig_col1, fig_col2 = st.columns(2)
 #===========================================================================
 #Primeira linha do dashboard
 
@@ -195,7 +195,7 @@ with fig_col1:
     plot_data['Proporção'] = np.where(plot_data['Leads'] > 0, (plot_data['Vendas'] / plot_data['Leads']) * 100, 0)
 
     # Criar o gráfico de barras com a proporção
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(14,6))
     plot_data[['Leads', 'Vendas']].plot(kind='bar', ax=ax)
     plot_data['Proporção'].plot(kind='line', ax=ax, secondary_y=True, color='red', marker='o')
 
@@ -211,5 +211,187 @@ with fig_col1:
 
     # Exibir o gráfico
     st.pyplot(fig)
+
+with fig_col2:
+    # Filtrando imóveis que estão à venda e ainda não foram vendidos
+    imoveis_a_venda = imoveis[(imoveis['vendido'] == 0) & (imoveis['Finalidade'] == 'Compra')]
+
+    # Contagem de imóveis na amostra
+    total_imoveis = len(imoveis_a_venda)
+
+    # Criando um histograma com uma linha KDE
+    fig, ax = plt.subplots(figsize=(14,6))
+    ax.hist(imoveis_a_venda['precoVenda'], bins=30, color='skyblue', edgecolor='black')
+    
+    # Adicionando a legenda com a quantidade de imóveis
+    plt.text(x=max(imoveis_a_venda['precoVenda']), y=0.9*plt.gca().get_ylim()[1], s=f'Total de Imóveis: {total_imoveis}', 
+            horizontalalignment='right', fontsize=20, color='black')
+
+    # Configurando título e eixos
+    plt.title('Distribuição dos Preços de Venda dos Imóveis Anunciados')
+    plt.xlabel('Preço de Venda')
+    plt.ylabel('Quantidade')
+    plt.grid(False)
+
+    # Exibir o gráfico
+    st.pyplot(fig)
+
+fig_col1, fig_col2, fig_col3, fig_col4 = st.columns(4)
+#===========================================================================
+#Segunda linha do dashboard
+with fig_col1:
+        # Obter o quarter atual
+    current_quarter = pd.Timestamp.now().quarter
+    current_year = pd.Timestamp.now().year
+
+    # Obter o quarter anterior
+    if current_quarter == 1:
+        previous_quarter = 4
+        previous_year = current_year - 1
+    else:
+        previous_quarter = current_quarter - 1
+        previous_year = current_year
+
+    # Filtrar leads do quarter atual
+    leads_current_quarter = clientes[(clientes['lead_date'].dt.year == current_year) & (clientes['lead_date'].dt.quarter == current_quarter)]
+
+    # Filtrar leads do quarter anterior
+    leads_previous_quarter = clientes[(clientes['lead_date'].dt.year == previous_year) & (clientes['lead_date'].dt.quarter == previous_quarter)]
+
+    # Calcular a quantidade de leads para cada quarter
+    qtd_leads_current_quarter = len(leads_current_quarter)
+    qtd_leads_previous_quarter = len(leads_previous_quarter)
+
+    # Calcular a diferença entre os quarters
+    diferenca = qtd_leads_current_quarter - qtd_leads_previous_quarter
+
+    # Criando o gráfico para exibir a quantidade de lead    s do quarter atual e a diferença
+    fig, ax = plt.subplots(figsize=(4,2))
+    plt.text(0.5, 0.6, f'{qtd_leads_current_quarter}', ha='center', va='center', fontsize=40, color='blue')
+    plt.text(0.5, 0.4, f'{diferenca} em Comparação ao Anterior', ha='center', va='center', fontsize=14, color='red' if diferenca < 0 else 'green')
+    plt.title('Leads do Quarter Atual')
+    plt.axis('off')  # Desligar o eixo
+    fig.savefig('current_quarter_leads.png')  # Save the figure as an image
+    st.image('current_quarter_leads.png') 
+
+with fig_col2:
+        # Definindo custos de marketing e vendas (exemplo)
+    custo_marketing_vendas = 100000  # Exemplo: R$100.000 por mês
+
+    # Data atual e data do mês anterior
+    data_atual = pd.Timestamp.now()
+    data_anterior = data_atual - pd.DateOffset(months=1)
+
+    # Calculando o número de novos clientes no mês atual e no mês anterior
+    novos_clientes_mes_atual = len(clientes[clientes['lead_date'].dt.to_period('M') == data_atual.to_period('M')])
+    novos_clientes_mes_anterior = len(clientes[clientes['lead_date'].dt.to_period('M') == data_anterior.to_period('M')])
+
+    # Calculando o CAC atual e do mês anterior
+    CAC_atual = custo_marketing_vendas / novos_clientes_mes_atual if novos_clientes_mes_atual > 0 else float('inf')
+    CAC_anterior = custo_marketing_vendas / novos_clientes_mes_anterior if novos_clientes_mes_anterior > 0 else float('inf')
+
+    # Plotando o valor do CAC atual e a comparação com o mês anterior
+    fig, ax = plt.subplots(figsize=(4,2))
+    plt.text(0.5, 0.6, f'R${CAC_atual:.2f}', ha='center', va='center', fontsize=40, color='blue')
+    diferenca_CAC = CAC_atual - CAC_anterior
+    plt.text(0.5, 0.4, f'R${diferenca_CAC:.2f} Mais Caro que no Mês Passado' if diferenca_CAC >  0 else f'R${diferenca_CAC:.2f} Mais Barato que no Mês Passado'  , ha='center', va='center', fontsize=14, color='red' if diferenca_CAC >  0 else 'green')
+    plt.title('CAC Atual')
+    plt.axis('off')  # Desligar o eixo
+    fig.savefig('last_month_CAC.png')  # Save the figure as an image
+    st.image('last_month_CAC.png') 
+
+with fig_col3:
+    # Suponha que 'clientes' e 'imoveis' sejam seus DataFrames
+    custo_marketing_vendas = 60000000  # Exemplo: R$100.000 por mês
+
+    # Receita dos imóveis vendidos no mês atual e anterior
+    data_atual = pd.Timestamp.now()
+    data_anterior = data_atual - pd.DateOffset(months=1)
+
+    receita_mes_atual = imoveis[(imoveis['vendido'] == 1) & (imoveis['sold_date'].dt.to_period('M') == data_atual.to_period('M'))]['precoVenda'].sum()
+    receita_mes_anterior = imoveis[(imoveis['vendido'] == 1) & (imoveis['sold_date'].dt.to_period('M') == data_anterior.to_period('M'))]['precoVenda'].sum()
+
+    # Calculando o ROI atual e do mês anterior
+    ROI_atual = (receita_mes_atual - custo_marketing_vendas) / custo_marketing_vendas * 100
+    ROI_anterior = (receita_mes_anterior - custo_marketing_vendas) / custo_marketing_vendas * 100
+
+    # Plotando o valor do ROI atual e a comparação com o mês anterior
+    fig, ax = plt.subplots(figsize=(4,2))
+    plt.text(0.5, 0.6, f'{ROI_atual:.2f}%', ha='center', va='center', fontsize=40, color='blue')
+    plt.text(0.5, 0.4, f'{abs(ROI_atual - ROI_anterior):.2f}% Menor que Mês Passado' if ROI_atual - ROI_anterior <  0 else f'R${ROI_atual - ROI_anterior:.2f} Maior que Mês Passado', ha='center', va='center', fontsize=14, color='red' if ROI_atual - ROI_anterior < 0 else 'green')
+    plt.title('ROAS')
+    plt.axis('off')
+    fig.savefig('ROAS.png')  # Save the figure as an image
+    st.image('ROAS.png') 
+
+with fig_col4:
+    # Revisando as datas para garantir que 'data_anuncio' é anterior a 'sold_date'
+    # e calculando a diferença de dias apenas para imóveis vendidos
+    imoveis['Days_On_Market'] = imoveis.apply(lambda row: (row['sold_date'] - row['data_anuncio']).days if row['vendido'] == 1 and row['data_anuncio'] <= row['sold_date'] else np.nan, axis=1)
+
+    # Calculando a média de Days On Market para os imóveis vendidos
+    average_days_on_market = imoveis['Days_On_Market'].dropna().mean()
+   
+
+    # Plotting the average Days On Market
+    fig, ax = plt.subplots(figsize=(4,2))
+    plt.text(0.5, 0.6, f'{average_days_on_market} dias', ha='center', va='center', fontsize=40, color='blue')
+    plt.title('Tempo Médio de Imóveis Anunciados')
+    plt.axis('off')
+    fig.savefig('anoucement_time.png')  # Save the figure as an image
+    st.image('anoucement_time.png') 
+
+
+
+
+
+    # Definir o quarter atual
+
+
+fig_col1, fig_col2, fig_col3 = st.columns(3)
+#===========================================================================
+#Terceira linha do dashboard
+
+with fig_col1:
+    quarter_atual = pd.Timestamp.now().quarter
+
+    # Filtrar os dados para o quarter atual
+    leads_quarter_atual = clientes[clientes['lead_date'].dt.quarter == quarter_atual]
+
+    # Contar leads por origem
+    leads_por_origem = leads_quarter_atual['Origem'].value_counts()
+
+    # Definir uma lista de cores
+    cores = ['blue', 'green', 'red', 'purple', 'orange', 'brown']
+
+    # Criar o gráfico de barras horizontal com cores diferentes
+    fig, ax = plt.subplots(figsize=(4,2))
+    leads_por_origem.plot(kind='barh', color=cores[:len(leads_por_origem)])
+    plt.title('Leads por Origem - Quarter Atual')
+    plt.xlabel('Quantidade de Leads')
+    plt.ylabel('Origem')
+    plt.tight_layout()
+
+
+    st.pyplot(fig)
+
+with fig_col2:
+    # Filtrar dados para o quarter atual
+    quarter_atual = pd.Timestamp.now().quarter
+    leads_quarter_atual = clientes[clientes['lead_date'].dt.quarter == quarter_atual]
+
+    # Contar a quantidade de leads quentes, frios e mornos
+    contagem_leads = leads_quarter_atual['Classificacao_Lead'].value_counts()
+
+    # Definir cores para cada tipo de lead
+    cores = ['red', 'orange', 'blue']
+
+    # Criar gráfico de pizza aberto com as cores específicas
+    fig, ax = plt.subplots(figsize=(4,2))
+    contagem_leads.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=cores, wedgeprops=dict(width=0.3))
+    plt.title('Proporção de Leads Quentes, Frios e Mornos - Quarter Atual')
+    plt.ylabel('')  # Remover o label do eixo y
+
+    st.pyplot(fig)  
 
 

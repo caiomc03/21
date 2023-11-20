@@ -229,7 +229,7 @@ with fig_col3:
     # Now we create the pie chart data.
     labels = ['Disponíveis para Venda', 'Disponíveis para Alugar']
     sizes = [disponiveis_para_venda, disponiveis_para_alugar]
-    colors = ['#289c84','#283c54']  # Gold for sale, Sky blue for rent
+    colors = ['#283c54','#289c84']  
 
     # Plotting the pie chart.
     fig, ax = plt.subplots()
