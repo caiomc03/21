@@ -194,7 +194,7 @@ with fig_col2:
     # Data to plot
     labels = ['Alugado', 'Vago']
     data = [percent_rent, 100-percent_rent]
-    colors = ['#289c84', '#9ba8a8']   # Gold for sold, Light blue for available
+    colors = ['#289c84', '#9ba8a8']   
 
     # Plotting the data
     fig, ax = plt.subplots()

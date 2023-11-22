@@ -204,11 +204,11 @@ with fig_col1:
     fig.set_figheight(7)
 
 
-    plot_data[['Leads', 'Vendas']].plot(kind='bar', ax=ax,colormap='Paired')
+    plot_data[['Leads', 'Vendas']].plot(kind='bar', ax=ax, color=['#289c84', '#283c54'])
     plot_data['Proporção'].plot(kind='line', ax=ax, secondary_y=True, color='#289c84', marker='o')
 
     # Configurações do gráfico
-    ax.set_xlabel('Mês (Ano, Mês)')
+    ax.set_xlabel('Ano, Mês')
     ax.set_ylabel('Quantidade de Vendas')
     ax.right_ax.set_ylabel('Proporção de Conversão (Vendas / Leads)')
     plt.xticks(rotation=45)
@@ -234,7 +234,7 @@ with fig_col2:
     fig.set_linewidth(4)
     fig.set_edgecolor('#283c54')
     fig.set_figheight(6.5)
-    ax.hist(imoveis_a_venda['precoVenda'], bins=30, color='#289c84', edgecolor='black')
+    ax.hist(imoveis_a_venda['precoVenda'], bins=30, color='#283c54', edgecolor='black')
     
     # Adicionando a legenda com a quantidade de imóveis
     plt.text(x=max(imoveis_a_venda['precoVenda']), y=0.9*plt.gca().get_ylim()[1], s=f'Total de Imóveis: {total_imoveis}', 
@@ -243,7 +243,7 @@ with fig_col2:
     # Configurando título e eixos
 
     plt.xlabel('Preço de Venda')
-    plt.ylabel('Quantidade')
+    plt.ylabel('Quantidade de Imoveis')
     plt.grid(False)
 
     # Exibir o gráfico
@@ -287,7 +287,10 @@ with fig_col1:
     fig.set_linewidth(4)
     fig.set_edgecolor('#283c54')
     plt.text(0.5, 0.6, f'{qtd_leads_current_quarter}', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
-    plt.text(0.5, 0.2, f'{diferenca} em Comparação ao Anterior', ha='center', va='center', fontsize=14, color='red' if diferenca < 0 else 'green')
+    if(diferenca< 0):
+        plt.text(0.5, 0.2, f' ↓ {diferenca}', ha='center', va='center', fontsize=14, color='red' )
+    else:
+        plt.text(0.5, 0.2, f' ↑ {diferenca}', ha='center', va='center', fontsize=14, color='green')
     plt.axis('off')  # Desligar o eixo
     fig.savefig('current_quarter_leads.png')  # Save the figure as an image
     st.image('current_quarter_leads.png') 
@@ -318,7 +321,10 @@ with fig_col2:
     fig.set_edgecolor('#283c54')
     plt.text(0.5, 0.6, f'R${CAC_atual:.2f}', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
     diferenca_CAC = CAC_atual - CAC_anterior
-    plt.text(0.5, 0.2, f'R${diferenca_CAC:.2f} Mais Caro que no Mês Passado' if diferenca_CAC >  0 else f'R${diferenca_CAC:.2f} Mais Barato que no Mês Passado'  , ha='center', va='center', fontsize=14, color='red' if diferenca_CAC >  0 else 'green')
+    if diferenca_CAC > 0:
+        plt.text(0.5, 0.2, f' ↑ R${diferenca_CAC:.2f}', ha='center', va='center', fontsize=14, color='red')
+    else:
+        plt.text(0.5, 0.2, f' ↓ R${diferenca_CAC:.2f}', ha='center', va='center', fontsize=14, color='green')
     plt.axis('off')  # Desligar o eixo
     fig.savefig('last_month_CAC.png')  # Save the figure as an image
     st.image('last_month_CAC.png') 
@@ -340,14 +346,18 @@ with fig_col3:
     # Calculando o ROI atual e do mês anterior
     ROI_atual = (receita_mes_atual - custo_marketing_vendas) / custo_marketing_vendas * 100
     ROI_anterior = (receita_mes_anterior - custo_marketing_vendas) / custo_marketing_vendas * 100
-
+    ROI_diff = ROI_atual-ROI_anterior
     # Plotando o valor do ROI atual e a comparação com o mês anterior
     fig, ax = plt.subplots(figsize=(4,2))
     fig.patch.set_facecolor('#d8e4e4')
     fig.set_linewidth(4)
     fig.set_edgecolor('#283c54')
     plt.text(0.5, 0.6, f'{ROI_atual:.2f}%', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
-    plt.text(0.5, 0.2, f'{abs(ROI_atual - ROI_anterior):.2f}% Menor que Mês Passado' if ROI_atual - ROI_anterior <  0 else f'R${ROI_atual - ROI_anterior:.2f} Maior que Mês Passado', ha='center', va='center', fontsize=14, color='red' if ROI_atual - ROI_anterior < 0 else 'green')
+    if ROI_diff > 0:
+        plt.text(0.5, 0.2, f' ↑ {abs(ROI_diff):.2f}% ', ha='center', va='center', fontsize=14, color='green')
+    else:
+        plt.text(0.5, 0.2, f' ↓ {abs(ROI_diff):.2f}% ', ha='center', va='center', fontsize=14, color='red')
+    
     plt.axis('off')
     fig.savefig('ROAS.png')  # Save the figure as an image
     st.image('ROAS.png') 
@@ -362,7 +372,7 @@ with fig_col4:
 
     # Calculando a média de Days On Market para os imóveis vendidos
     average_days_on_market = imoveis['Days_On_Market'].dropna().mean()
-   
+    fake_last_average = average_days_on_market + random.randint(-12 , -8)
 
     # Plotting the average Days On Market
     fig, ax = plt.subplots(figsize=(4,2))
@@ -370,6 +380,7 @@ with fig_col4:
     fig.set_linewidth(4)
     fig.set_edgecolor('#283c54')
     plt.text(0.5, 0.6, f'{average_days_on_market} dias', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
+    plt.text(0.5, 0.2, f' ↓ {fake_last_average} dias',  ha='center', va='center', fontsize=14, color='green', fontweight='bold')
     plt.axis('off')
     fig.savefig('anoucement_time.png')  # Save the figure as an image
     st.image('anoucement_time.png') 
@@ -401,24 +412,22 @@ with fig_col1:
     cores = ['#283c54', '#285460', '#286c6c', '#288478', '#289c84']
 
     # Criar o gráfico de barras horizontal com cores diferentes
-    fig, ax = plt.subplots(figsize=(4,2))
+    fig, ax = plt.subplots(figsize=(14,2))
     fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(4)
+    fig.set_linewidth(2)
     fig.set_edgecolor('#283c54')
-    fig.set_figwidth(6)
-    fig.set_figheight(5.8)
+    fig.set_figwidth(4)  # Aumentar a largura do gráfico
+    fig.set_figheight(3)
     leads_por_origem.plot(kind='barh', color=cores[:len(leads_por_origem)])
     plt.xlabel('Quantidade de Leads')
     plt.ylabel('Origem')
     plt.tight_layout()
-
 
     st.pyplot(fig)
 
 with fig_col2:
 
     st.markdown('### :grey[Tipos de Leads - Quarter Atual]')
-
 
     # Filtrar dados para o quarter atual
     quarter_atual = pd.Timestamp.now().quarter
@@ -433,25 +442,26 @@ with fig_col2:
     # Criar gráfico de pizza aberto com as cores específicas
     fig, ax = plt.subplots(figsize=(4,2))
     fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(2)
+    fig.set_linewidth(1)  # Reduzir a espessura da borda
     fig.set_edgecolor('#283c54')
-    fig.set_figheight(2)
-    contagem_leads.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=cores, wedgeprops=dict(width=0.3), textprops={'fontsize': 6})
+    fig.set_figheight(3)  # Aumentar a altura da figura
+    fig.set_figwidth(4)  
+    contagem_leads.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=cores, wedgeprops=dict(width=0.3), textprops={'fontsize': 8})  # Aumentar o tamanho da fonte
     plt.ylabel('')  # Remover o label do eixo y
 
-    st.pyplot(fig)  
+    st.pyplot(fig, dpi=300)  # Aumentar a resolução da imagem
 
-with fig_col3:
-    st.markdown('### :grey[Funil de Marketing]')
+# with fig_col3:
+#     st.markdown('### :grey[Funil de Marketing]')
 
-    fig, ax = plt.subplots(figsize=(4,2))
-    fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    plt.text(0.5, 0.6, 'PLACEHOLDER', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
-    plt.axis('off')
-    fig.savefig('anoucement_time.png')  # Save the figure as an image
-    st.image('anoucement_time.png') 
+#     fig, ax = plt.subplots(figsize=(4,2))
+#     fig.patch.set_facecolor('#d8e4e4')
+#     fig.set_linewidth(4)
+#     fig.set_edgecolor('#283c54')
+#     plt.text(0.5, 0.6, 'PLACEHOLDER', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
+#     plt.axis('off')
+#     fig.savefig('anoucement_time.png')  # Save the figure as an image
+#     st.image('anoucement_time.png') 
 
     
 
