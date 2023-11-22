@@ -348,7 +348,12 @@ with fig_col1:
     # Plotando o gráfico
     fig, ax = plt.subplots()
     plt.text(0.5, 0.6, simplified_current_sales, ha='center', va='center', fontsize=18, color='#283c54', fontweight='bold')
-    plt.text(0.5, 0.4, f'{proportional_difference_str} com Relação ao Quarter Passado', ha='center', va='center', fontsize=14, color='red')
+    if(proportional_difference_str<0):
+        plt.text(0.5, 0.4, f' ↓ {proportional_difference_str} com Relação ao Quarter Passado', ha='center', va='center', fontsize=14, color='red')
+    else:
+        plt.text(0.5, 0.4, f' ↑ {proportional_difference_str} com Relação ao Quarter Passado', ha='center', va='center', fontsize=14, color='green')
+
+
     plt.axis('off')
     fig.patch.set_facecolor('#d8e4e4')
     fig.set_linewidth(4)
