@@ -417,7 +417,7 @@ with fig_col1:
     fig.set_linewidth(2)
     fig.set_edgecolor('#283c54')
     fig.set_figwidth(4)  # Aumentar a largura do gráfico
-    fig.set_figheight(3)
+    fig.set_figheight(3.5)
     leads_por_origem.plot(kind='barh', color=cores[:len(leads_por_origem)])
     plt.xlabel('Quantidade de Leads')
     plt.ylabel('Origem')
@@ -444,8 +444,8 @@ with fig_col2:
     fig.patch.set_facecolor('#d8e4e4')
     fig.set_linewidth(1)  # Reduzir a espessura da borda
     fig.set_edgecolor('#283c54')
-    fig.set_figheight(3)  # Aumentar a altura da figura
-    fig.set_figwidth(4)  
+    fig.set_figheight(2)  # Aumentar a altura da figura
+    fig.set_figwidth(6)  
     contagem_leads.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=cores, wedgeprops=dict(width=0.3), textprops={'fontsize': 8})  # Aumentar o tamanho da fonte
     plt.ylabel('')  # Remover o label do eixo y
 
