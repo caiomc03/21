@@ -9,6 +9,8 @@ import pandas as pd  # read csv, df manipulation
 import plotly.express as px  # interactive charts
 import streamlit as st  #  data web app development
 from faker import Faker
+import plotly.graph_objects as go
+
 
 
 st.set_page_config(
@@ -147,41 +149,43 @@ fig_col1, fig_col2, fig_col3= st.columns(3)
 #Primeira linha do dashboard
 
 with fig_col1:
-    st.markdown("### :grey[Imoveis a venda]")
+    st.markdown('### :grey[Imóveis à Venda]')
    
     # Calculating the total number of properties and the percentage of those that are sold
     total_properties = len(imoveis_para_venda)
     sold_properties = imoveis['vendido'].sum()
     percent_sold = (sold_properties / total_properties) * 100
 
-    # Data to plot
+   # Data for the plot
     labels = ['Vendido', 'Disponível']
-    data = [percent_sold, 100-percent_sold]
+    values = [percent_sold, 100-percent_sold]
     colors = ['#283c54', '#9ba8a8']
-    
 
-    # Plotting the data
-    fig, ax = plt.subplots()
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(5)
-    ax.pie(x=data, explode=None, labels=labels, colors=colors, startangle=180)
+    # Create the pie chart
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.7, marker_colors=colors)])
 
-    # Creating a doughnut chart by setting a circle at the center again
-    circle = plt.Circle((0,0), 0.70, color='#d8e4e4')
+    # Update the layout
+    fig.update_layout(
+        # title_text='Total de Imóveis: ' + str(total_properties),
+        annotations=[dict(text=f'{percent_sold:.2f}%', x=0.5, y=0.5, font_size=16, showarrow=False)],
+        legend=dict(title='Legenda', itemsizing='constant'),
+        showlegend=True,
+        paper_bgcolor='#d8e4e4',
+        plot_bgcolor='#d8e4e4',
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
 
-    fig.gca().add_artist(circle)  # Adding the white circle in the middle
-    fig.patch.set_facecolor('#d8e4e4')
+    )
+    #### Alterar Legenda
+    fig.update_traces(hovertemplate='%{x}')
 
-    # Moving the legend to the bottom right corner
-    plt.legend(labels=['Vendido: ' + str(sold_properties), 'Disponível: ' + str(total_properties - sold_properties)],
-            title='Imóveis à venda: ' + str(total_properties),
-            loc='upper right')
+    st.plotly_chart(fig, theme= 'streamlit', use_container_width= True)
 
-    plt.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
-    plt.annotate('{:.2f}%'.format(percent_sold), (-0.2, 0), fontsize=16, fontweight='bold')
-
-    st.pyplot(fig)
 
 with fig_col2:
     st.markdown("### :grey[Imoveis Alugados]")
@@ -196,59 +200,61 @@ with fig_col2:
     data = [percent_rent, 100-percent_rent]
     colors = ['#289c84', '#9ba8a8']   # Gold for sold, Light blue for available
 
-    # Plotting the data
-    fig, ax = plt.subplots()
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(5)
-    ax.pie(x=data, explode=None, labels=labels, colors=colors,startangle=180, )
-    fig.patch.set_facecolor('#d8e4e4')
+    # Create the pie chart
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.7, marker_colors=colors)])
 
-    # Creating a doughnut chart by setting a circle at the center again
-    circle = plt.Circle((0,0), 0.70, color='#d8e4e4')
+    # Update the layout
+    fig.update_layout(
+        # title_text='Total de Imóveis: ' + str(total_properties),
+        annotations=[dict(text=f'{percent_sold:.2f}%', x=0.5, y=0.5, font_size=16, showarrow=False)],
+        legend=dict(title='Legenda', itemsizing='constant'),
+        showlegend=True,
+        paper_bgcolor='#d8e4e4',
+        plot_bgcolor='#d8e4e4',
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
 
-    fig.gca().add_artist(circle)  # Adding the white circle in the middle
+    )
+    #### Alterar Legenda
+    fig.update_traces(hovertemplate='%{x}')
 
-    # Moving the legend to the bottom right corner
-    plt.legend(labels=['Alugado: ' + str(rent_properties), 'Vago: ' + str(total_properties - rent_properties)], 
-            title='Imóveis para aluguel : ' + str(total_properties),
-            loc='upper right')
-
-    plt.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
-    plt.annotate('{:.2f}%'.format(percent_rent), (-0.2,0), fontsize=16, fontweight='bold')
-
-    st.pyplot(fig)  
+    st.plotly_chart(fig, theme= 'streamlit', use_container_width= True) 
 
 with fig_col3:
-    st.markdown("### :grey[Disponibilidade de Imóveis]")
    
     # Then, we calculate the counts for each category.
     disponiveis_para_venda = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Casa'])
     disponiveis_para_alugar = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Apartamento'])
     disponiveis_total = disponiveis_para_venda + disponiveis_para_alugar
-    # Now we create the pie chart data.
+    # Dados para o gráfico
     labels = ['Disponíveis para Venda', 'Disponíveis para Alugar']
-    sizes = [disponiveis_para_venda, disponiveis_para_alugar]
-    colors = ['#283c54','#289c84']  
+    values = [disponiveis_para_venda, disponiveis_para_alugar]
+    colors = ['#283c54', '#289c84']  # Azul escuro para venda, Verde para alugar
 
-    # Plotting the pie chart.
-    fig, ax = plt.subplots()
-    fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(4.85)
-    ax.pie(sizes, labels=labels, colors=colors,startangle=180)
-    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    # Criando o gráfico de pizza
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, marker_colors=colors)])
 
-    # Moving the legend to the bottom right corner
-    plt.legend(labels=[f'Alugar: {disponiveis_para_alugar}',f'Vender: {disponiveis_para_venda}'], 
-            title='Propoção de imóveis\n disponíveis',
-            loc='upper left')
-    
-    plt.annotate('{:.2f}%'.format(disponiveis_para_alugar/disponiveis_total*100), (-0.2,0.4), fontsize=16, fontweight='bold')
-    plt.annotate('{:.2f}%'.format(disponiveis_para_venda/disponiveis_total*100), (-0.2,-0.4), fontsize=16, fontweight='bold')
+    # Atualizando o layout
+    fig.update_layout(
+        annotations=[
+            dict(text=f'{disponiveis_para_venda/disponiveis_total*100:.2f}%', x=0.85, y=0.8, font_size=16, showarrow=False),
+            dict(text=f'{disponiveis_para_alugar/disponiveis_total*100:.2f}%', x=0.15, y=0.2, font_size=16, showarrow=False)
+        ],
+        legend=dict(title='Legenda', itemsizing='constant'),
+        showlegend=True,
+        paper_bgcolor='#d8e4e4',
+        plot_bgcolor='#d8e4e4'
+    )
 
-    st.pyplot(fig)
+    # Exibindo o gráfico no Streamlit
+    with st.container():
+        st.markdown("### :grey[Imóveis Disponíveis em Anúncio]")
+        st.plotly_chart(fig, use_container_width=True)
 
 #=================================================================================================
 #Segunda linha do dashboard
