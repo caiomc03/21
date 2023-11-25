@@ -230,14 +230,35 @@ with fig_col2:
 
     fig = px.histogram(imoveis_a_venda, x='precoVenda', nbins=30, color_discrete_sequence=['#283c54'])
     fig.update_layout(
-        title='Distribuição dos Preços dos Imóveis Anunciados',
-        xaxis_title='Preço de Venda',
-        yaxis_title='Quantidade de Imóveis',
+        xaxis=dict(
+        title=dict(
+            text='Preço de Venda (R$)',
+            font=dict(
+                color='#283c54',
+                size=25
+                )
+            )
+        ),
+        yaxis=dict(
+        title=dict(
+            text='Quantidade de Imóveis',
+            font=dict(
+                color='#283c54',
+                size=25
+                )
+            )
+        ),
         bargap=0.1,
         showlegend=False,
         width=800,
         height=430,
-        plot_bgcolor='#',
+        plot_bgcolor='#d8e4e4',
+        paper_bgcolor='#d8e4e4',
+        font=dict(
+            size=12,
+            color='#283c54',
+            family='Roboto'
+        )
 
     )
 
