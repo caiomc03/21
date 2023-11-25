@@ -8,6 +8,8 @@ import datetime as dt
 import random
 import seaborn as sns
 
+import plotly.express as px
+
 st.set_page_config(
     page_title="Dashboard",
     page_icon="✅",
@@ -214,7 +216,7 @@ with fig_col1:
     plt.xticks(rotation=45)
     ax.legend(loc='upper left')
     ax.right_ax.legend(loc='upper right')
-    # plt.tight_layout()
+    plt.tight_layout()
 
     # Exibir o gráfico
     st.pyplot(fig)
@@ -222,32 +224,35 @@ with fig_col1:
 with fig_col2:
     st.markdown('### :grey[Distribuição dos Preços dos Imóveis Anunciados]')
 
+
     # Filtrando imóveis que estão à venda e ainda não foram vendidos
     imoveis_a_venda = imoveis[(imoveis['vendido'] == 0) & (imoveis['Finalidade'] == 'Compra')]
 
-    # Contagem de imóveis na amostra
-    total_imoveis = len(imoveis_a_venda)
+    fig = px.histogram(imoveis_a_venda, x='precoVenda', nbins=30, color_discrete_sequence=['#283c54'])
+    fig.update_layout(
+        title='Distribuição dos Preços dos Imóveis Anunciados',
+        xaxis_title='Preço de Venda',
+        yaxis_title='Quantidade de Imóveis',
+        bargap=0.1,
+        showlegend=False,
+        width=800,
+        height=430,
+        plot_bgcolor='#',
 
-    # Criando um histograma com uma linha KDE
-    fig, ax = plt.subplots(figsize=(14,6))
-    fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(6.5)
-    ax.hist(imoveis_a_venda['precoVenda'], bins=30, color='#283c54', edgecolor='black')
-    
+    )
+
     # Adicionando a legenda com a quantidade de imóveis
-    plt.text(x=max(imoveis_a_venda['precoVenda']), y=0.9*plt.gca().get_ylim()[1], s=f'Total de Imóveis: {total_imoveis}', 
-            horizontalalignment='right', fontsize=20, color='black')
+    total_imoveis = len(imoveis_a_venda)
+    fig.add_annotation(
+        x=max(imoveis_a_venda['precoVenda'])*0.9,
+        y=80,
+        text=f'Total de Imóveis: {total_imoveis}',
+        showarrow=False,
+        font=dict(size=20)
+    )
 
-    # Configurando título e eixos
-
-    plt.xlabel('Preço de Venda')
-    plt.ylabel('Quantidade de Imoveis')
-    plt.grid(False)
-
-    # Exibir o gráfico
-    st.pyplot(fig)
+    # Exibir o gráfico interativo
+    st.plotly_chart(fig, theme='streamlit', use_container_width=True)
 
 fig_col1, fig_col2, fig_col3, fig_col4 = st.columns(4)
 #===========================================================================
