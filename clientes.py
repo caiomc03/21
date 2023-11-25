@@ -9,6 +9,8 @@ import random
 import seaborn as sns
 
 import plotly.express as px
+import plotly.graph_objects as go
+
 
 st.set_page_config(
     page_title="Dashboard",
@@ -169,6 +171,8 @@ def classificar_lead(row):
 # Aplicar a função para criar a coluna condicional
 clientes['Classificacao_Lead'] = clientes.apply(classificar_lead, axis=1)
 
+
+
 #Fim da criação do dataframe de clientes fake
 #===========================================================================
 
@@ -181,55 +185,68 @@ with fig_col1:
     st.markdown('### :grey[Proporção Leads e Vendas Mensais]')
     # Supondo que 'clientes' e 'imoveis' sejam seus DataFrames
 
+    
+
     # Contar leads por mês
     leads_per_month = clientes['lead_date'].groupby([clientes['lead_date'].dt.year, clientes['lead_date'].dt.month]).count()
 
     # Contar vendas por mês
     sales_per_month = imoveis[imoveis['vendido'] == 1]['sold_date'].groupby([imoveis['sold_date'].dt.year, imoveis['sold_date'].dt.month]).count()
 
-    # Criar DataFrame para o gráfico
-    plot_data = pd.DataFrame({
-        'Leads': leads_per_month,
-        'Vendas': sales_per_month
+    # Create a DataFrame for the graph
+    leads = pd.DataFrame({
+    'count': leads_per_month,
+    'type': 'Leads'
     })
 
-    # Preencher valores NaN com 0   
-    plot_data = plot_data.fillna(0)
+    sales = pd.DataFrame({
+        'count': sales_per_month,
+        'type': 'Vendas'
+    })
 
-    plot_data['Proporção'] = np.where(plot_data['Leads'] > 0, (plot_data['Vendas'] / plot_data['Leads']) * 100, 0)
+    plot_data_final = pd.concat([leads, sales])
 
-    # Criar o gráfico de barras com a proporção
-    fig, ax = plt.subplots(figsize=(14,6))
-    fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(7)
+    plot_data_final['date'] = plot_data_final.index
 
+    plot_data_final['date'] = plot_data_final['date'].apply(lambda x: f"{int(x[0])}-{int(x[1])}")
 
-    plot_data[['Leads', 'Vendas']].plot(kind='bar', ax=ax, color=['#289c84', '#283c54'])
-    plot_data['Proporção'].plot(kind='line', ax=ax, secondary_y=True, color='#289c84', marker='o')
+    plot_data_final['date'] = pd.to_datetime(plot_data_final['date'])
 
-    # Configurações do gráfico
-    ax.set_xlabel('Ano, Mês')
-    ax.set_ylabel('Quantidade de Vendas')
-    ax.right_ax.set_ylabel('Proporção de Conversão (Vendas / Leads)')
-    plt.xticks(rotation=45)
-    ax.legend(loc='upper left')
-    ax.right_ax.legend(loc='upper right')
-    plt.tight_layout()
+    df = pd.DataFrame({
+    'Leads': leads_per_month,
+    'Vendas': sales_per_month
+    })
 
-    # Exibir o gráfico
-    st.pyplot(fig)
+    df['proporcao'] = np.where(df['Leads'] > 0, (df['Vendas'] / df['Leads']) * 100, 0)
 
-with fig_col2:
-    st.markdown('### :grey[Distribuição dos Preços dos Imóveis Anunciados]')
+    df['date'] = df.index
 
+    df['date'] = df['date'].apply(lambda x: f"{int(x[0])}-{int(x[1])}")
 
-    # Filtrando imóveis que estão à venda e ainda não foram vendidos
-    imoveis_a_venda = imoveis[(imoveis['vendido'] == 0) & (imoveis['Finalidade'] == 'Compra')]
+    df['date'] = pd.to_datetime(df['date'])
+    
 
-    fig = px.histogram(imoveis_a_venda, x='precoVenda', nbins=30, color_discrete_sequence=['#283c54'])
+    fig = px.bar(plot_data_final, y='count', x='date',color='type',  orientation='v', barmode='group', color_discrete_sequence=['#283c54', '#289c84'])
+    fig.add_trace(
+        go.Scatter(
+            x=df['date'],
+            y=df['proporcao'],
+            mode='lines+markers',
+            name='Proporção (%)',
+            marker=dict(
+                color='#FF0000'
+            ),
+            line=dict(
+                color='#FF0000'
+            )
+        )
+    )
+
     fig.update_layout(
+font=dict(
+            color='#283c54',
+            family='Roboto'
+        ),
         xaxis=dict(
         tickfont=dict(
         color='#283c54',
@@ -245,21 +262,85 @@ with fig_col2:
         ),
         yaxis=dict(
         tickfont=dict(
-            color='#283c54',
-            size=15
+            size=15,
+            color='#283c54'
         ),
         title=dict(
             text='Quantidade de Imóveis',
+            font=dict(
+                size=25,
+                color='#283c54'
+                )
+            )
+        ),
+        legend=dict(
+            font=dict(
+                size=20,
+                color='#283c54',
+            ),
+        ),
+        bargap=0.1,
+        showlegend=True,
+        width=800,
+        height=500,
+        plot_bgcolor='#d8e4e4',
+        paper_bgcolor='#d8e4e4',
+        
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        )
+    )
+
+    fig.update_traces(hovertemplate='%{y}<extra></extra>')
+
+    # Exibir o gráfico
+    st.plotly_chart(fig)
+
+with fig_col2:
+    st.markdown('### :grey[Distribuição dos Preços dos Imóveis Anunciados]')
+
+
+    # Filtrando imóveis que estão à venda e ainda não foram vendidos
+    imoveis_a_venda = imoveis[(imoveis['vendido'] == 0) & (imoveis['Finalidade'] == 'Compra')]
+
+    fig = px.histogram(imoveis_a_venda, x='precoVenda', nbins=30, color_discrete_sequence=['#283c54'])
+    fig.update_layout(
+        font=dict(
+            color='#283c54',
+            family='Roboto'
+        ),
+        xaxis=dict(
+        tickfont=dict(
+        color='#283c54',
+        size=15
+        ),
+        title=dict(
+            text='Preço de Venda (R$)',
             font=dict(
                 color='#283c54',
                 size=25
                 )
             )
         ),
+        yaxis=dict(
+        tickfont=dict(
+            size=15
+        ),
+        title=dict(
+            text='Quantidade de Imóveis',
+            font=dict(
+                size=25
+                )
+            )
+        ),
         bargap=0.1,
         showlegend=False,
-        width=800,
-        height=430,
+        width=200,
+        height=500,
         plot_bgcolor='#d8e4e4',
         paper_bgcolor='#d8e4e4',
         
@@ -270,13 +351,7 @@ with fig_col2:
             ),
             bordercolor='#289c84'
         ),
-        font=dict(
-            size=12,
-            color='#283c54',
-            family='Roboto'
-        ),
         hovermode='x'
-
     )
 
     fig.update_traces(hovertemplate='Quantidade de imóveis: %{y}<extra></extra>')
@@ -287,8 +362,7 @@ with fig_col2:
         x=max(imoveis_a_venda['precoVenda'])*0.5,
         y=max(fig.data[0]),
         text=f'Total de Imóveis: {total_imoveis}',
-        showarrow=False,
-        font=dict(size=20)
+        font=dict(size=30)
     )
 
     # Exibir o gráfico interativo
@@ -457,18 +531,64 @@ with fig_col1:
     cores = ['#283c54', '#285460', '#286c6c', '#288478', '#289c84']
 
     # Criar o gráfico de barras horizontal com cores diferentes
-    fig, ax = plt.subplots(figsize=(14,2))
-    fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(2)
-    fig.set_edgecolor('#283c54')
-    fig.set_figwidth(4)  # Aumentar a largura do gráfico
-    fig.set_figheight(3.5)
-    leads_por_origem.plot(kind='barh', color=cores[:len(leads_por_origem)])
-    plt.xlabel('Quantidade de Leads')
-    plt.ylabel('Origem')
-    plt.tight_layout()
+    fig = go.Figure(data=[go.Bar(
+        x=leads_por_origem.values,
+        y=leads_por_origem.index,
+        orientation='h',
+        marker=dict(color=cores[:len(leads_por_origem)])
+    )])
 
-    st.pyplot(fig)
+    
+    
+    fig.update_layout(
+        font=dict(
+            color='#283c54',
+            family='Roboto'
+        ),
+        xaxis=dict(
+            tickfont=dict(
+                color='#283c54',
+                size=15
+            ),
+            title=dict(
+                text='Número de Leads',
+                font=dict(
+                    color='#283c54',
+                    size=25
+                )
+            )
+        ),
+        yaxis=dict(
+            tickfont=dict(
+                color='#283c54',
+                size=15
+            ),
+        title=dict(
+            text='Origem das Leads',
+            font=dict(
+                size=25,
+                color='#283c54',
+                )
+            )
+        ),
+        bargap=0.1,
+        showlegend=False,
+        plot_bgcolor='#d8e4e4',
+        paper_bgcolor='#d8e4e4',
+        width=800,
+        height=500,
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
+    )
+
+    fig.update_traces(hovertemplate='Quantidade de Leads: %{x}<extra></extra>')
+
+    st.plotly_chart(fig, theme='streamlit', use_container_width=True)
 
 with fig_col2:
 
@@ -484,30 +604,102 @@ with fig_col2:
     # Definir cores para cada tipo de lead
     cores = ['#289c84', '#283c54', '#286c6c']
 
-    # Criar gráfico de pizza aberto com as cores específicas
-    fig, ax = plt.subplots(figsize=(4,2))
-    fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(1)  # Reduzir a espessura da borda
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(2)  # Aumentar a altura da figura
-    fig.set_figwidth(6)  
-    contagem_leads.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=cores, wedgeprops=dict(width=0.3), textprops={'fontsize': 8})  # Aumentar o tamanho da fonte
-    plt.ylabel('')  # Remover o label do eixo y
+    # Criar gráfico de doughnut com as cores específicas
+    fig = go.Figure(data=[go.Pie(
+        labels=contagem_leads.index,
+        values=contagem_leads.values,
+        hole=0.6,
+        marker=dict(colors=cores),
+        textinfo='percent',
+        hovertemplate='Quantidade de Leads: %{value}<extra></extra>'
+    )])
 
-    st.pyplot(fig, dpi=300)  # Aumentar a resolução da imagem
+    fig.update_layout(
+        font=dict(
+            color='#283c54',
+            family='Roboto'
+        ),
+        legend=dict(
+            font=dict(
+                size=20,
+                color='#283c54',
+            ),
+        ),
+        plot_bgcolor='#d8e4e4',
+        paper_bgcolor='#d8e4e4',
+        width=300,
+        height=500,
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
+    )
 
-# with fig_col3:
-#     st.markdown('### :grey[Funil de Marketing]')
+    fig.update_traces(textposition='inside', textfont_size=20, hovertemplate='Quantidade de Leads: %{value}<extra></extra>')
 
-#     fig, ax = plt.subplots(figsize=(4,2))
-#     fig.patch.set_facecolor('#d8e4e4')
-#     fig.set_linewidth(4)
-#     fig.set_edgecolor('#283c54')
-#     plt.text(0.5, 0.6, 'PLACEHOLDER', ha='center', va='center', fontsize=40, color='#283c54', fontweight='bold')
-#     plt.axis('off')
-#     fig.savefig('anoucement_time.png')  # Save the figure as an image
-#     st.image('anoucement_time.png') 
+    st.plotly_chart(fig, theme='streamlit', use_container_width=True)
+    
+with fig_col3:
+    st.markdown('### :grey[Funil de Marketing]')
 
+    # Definindo o quarter atual
+    current_quarter = pd.Timestamp.now().quarter
+    current_year = pd.Timestamp.now().year
+
+    # Filtrando clientes deste quarter
+    clientes_quarter_atual = clientes[(clientes['lead_date'].dt.year == current_year) &
+                                    (clientes['lead_date'].dt.quarter == current_quarter)]
+
+    # Contando clientes de cada etapa do funil
+    total_clientes = len(clientes_quarter_atual)
+    clientes_LP = len(clientes_quarter_atual[clientes_quarter_atual['LP'] == 1])
+    clientes_LP_Form = len(clientes_quarter_atual[(clientes_quarter_atual['LP'] == 1) &
+                                                (clientes_quarter_atual['Formulario'] == 1)])
+
+    funil_cores = ['#283c54', '#286c6c', '#289c84']
+
+    # Criando o gráfico de funil com cores específicas para cada etapa
+    data = dict(
+        number = ['Total Clientes', 'Foram ao Site', 'Preencheram o Formulário'],
+        stage = [total_clientes, clientes_LP, clientes_LP_Form])
+
+    fig = go.Figure(go.Funnel(
+    y = data['number'],
+    x = data['stage'],
+    textinfo = "value+percent initial",
+    marker = {"color": funil_cores}
+    ))
+
+    fig.update_layout(
+        font=dict(
+            color='#283c54',
+            family='Roboto'
+        ),
+        # yaxis=dict(
+        #     tickfont=dict(
+        #         color='#283c54',
+        #         size=20
+        #     ),
+        # ),
+        plot_bgcolor='#d8e4e4',
+        paper_bgcolor='#d8e4e4',
+        width=800,
+        height=500,
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
+    )
+
+    fig.update_traces(textposition='inside', textfont_size=25, hovertemplate='%{y}<extra></extra>')
+
+    st.plotly_chart(fig, theme='streamlit', use_container_width=True)
     
 
 
