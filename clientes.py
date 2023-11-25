@@ -231,6 +231,10 @@ with fig_col2:
     fig = px.histogram(imoveis_a_venda, x='precoVenda', nbins=30, color_discrete_sequence=['#283c54'])
     fig.update_layout(
         xaxis=dict(
+        tickfont=dict(
+        color='#283c54',
+        size=15
+        ),
         title=dict(
             text='Preço de Venda (R$)',
             font=dict(
@@ -240,6 +244,10 @@ with fig_col2:
             )
         ),
         yaxis=dict(
+        tickfont=dict(
+            color='#283c54',
+            size=15
+        ),
         title=dict(
             text='Quantidade de Imóveis',
             font=dict(
@@ -254,19 +262,30 @@ with fig_col2:
         height=430,
         plot_bgcolor='#d8e4e4',
         paper_bgcolor='#d8e4e4',
+        
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
         font=dict(
             size=12,
             color='#283c54',
             family='Roboto'
-        )
+        ),
+        hovermode='x'
 
     )
 
+    fig.update_traces(hovertemplate='Quantidade de imóveis: %{y}<extra></extra>')
+    
     # Adicionando a legenda com a quantidade de imóveis
     total_imoveis = len(imoveis_a_venda)
     fig.add_annotation(
-        x=max(imoveis_a_venda['precoVenda'])*0.9,
-        y=80,
+        x=max(imoveis_a_venda['precoVenda'])*0.5,
+        y=max(fig.data[0]),
         text=f'Total de Imóveis: {total_imoveis}',
         showarrow=False,
         font=dict(size=20)
