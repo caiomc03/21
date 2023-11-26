@@ -154,7 +154,7 @@ with fig_col1:
     # Calculating the total number of properties and the percentage of those that are sold
     total_properties = len(imoveis_para_venda)
     sold_properties = imoveis['vendido'].sum()
-    percent_sold = (sold_properties / total_properties) * 100
+    percent_sold = ((sold_properties / total_properties) * 100).round(1)
 
    # Data for the plot
     labels = ['Vendido', 'Disponível']
@@ -212,7 +212,7 @@ with fig_col2:
     # Calculating the total number of properties and the percentage of those that are sold
     total_properties = len(imoveis_para_alugar)
     rent_properties = imoveis['alugado'].sum()
-    percent_rent = (rent_properties / total_properties) * 100
+    percent_rent = ((rent_properties / total_properties) * 100).round(1)
 
     # Data to plot
     labels = ['Alugado', 'Vago']
@@ -261,13 +261,15 @@ with fig_col2:
     st.plotly_chart(fig, theme= 'streamlit', use_container_width= True) 
 
 with fig_col3:
-   
+    
+    st.markdown("### :grey[Imóveis Disponíveis em Anúncio]")
+    
     # Then, we calculate the counts for each category.
     disponiveis_para_venda = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Casa'])
     disponiveis_para_alugar = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Apartamento'])
     disponiveis_total = disponiveis_para_venda + disponiveis_para_alugar
     # Dados para o gráfico
-    labels = ['Disponíveis para Venda', 'Disponíveis para Alugar']
+    labels = ['Venda', 'Alugar']
     values = [disponiveis_para_venda, disponiveis_para_alugar]
     colors = ['#283c54', '#289c84']  # Azul escuro para venda, Verde para alugar
 
@@ -276,20 +278,21 @@ with fig_col3:
 
     # Atualizando o layout
     fig.update_layout(
-        annotations=[
-            dict(text=f'{disponiveis_para_venda/disponiveis_total*100:.2f}%', x=0.85, y=0.8, font_size=16, showarrow=False),
-            dict(text=f'{disponiveis_para_alugar/disponiveis_total*100:.2f}%', x=0.15, y=0.2, font_size=16, showarrow=False)
-        ],
-        legend=dict(title='Legenda', itemsizing='constant'),
+        legend=dict(
+            itemsizing='constant',
+            font=dict(
+                color='#283c54',
+                size=20
+            )
+            ),
         showlegend=True,
         paper_bgcolor='#d8e4e4',
         plot_bgcolor='#d8e4e4'
     )
 
-    # Exibindo o gráfico no Streamlit
-    with st.container():
-        st.markdown("### :grey[Imóveis Disponíveis em Anúncio]")
-        st.plotly_chart(fig, use_container_width=True)
+    fig.update_traces(hovertemplate='%{value}%<extra></extra>', textfont_size=25)
+    st.plotly_chart(fig, use_container_width=True)
+
 
 #=================================================================================================
 #Segunda linha do dashboard
