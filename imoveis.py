@@ -222,7 +222,6 @@ with fig_col2:
     # Update the layout
     fig.update_layout(
         legend=dict(
-            title='Legenda',
             itemsizing='constant',
             font=dict(
                 color='#283c54',
