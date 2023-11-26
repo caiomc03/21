@@ -10,6 +10,7 @@ import seaborn as sns
 
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 st.set_page_config(
@@ -217,7 +218,9 @@ with fig_col1:
     'Vendas': sales_per_month
     })
 
-    df['proporcao'] = np.where(df['Leads'] > 0, (df['Vendas'] / df['Leads']) * 100, 0)
+    df['proporcao'] = np.where(df['Leads'] > 0, (df['Vendas'] / df['Leads']) * 100,0)
+
+    df['proporcao'] = df['proporcao'].round(2)
 
     df['date'] = df.index
 
@@ -225,25 +228,53 @@ with fig_col1:
 
     df['date'] = pd.to_datetime(df['date'])
     
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    fig = px.bar(plot_data_final, y='count', x='date',color='type',  orientation='v', barmode='group', color_discrete_sequence=['#283c54', '#289c84'])
+    fig.add_trace(
+        go.Bar( y=leads_per_month,
+                x=plot_data_final['date'],
+                base='relative',
+                orientation='v',
+                name='Leads',
+                marker=dict(
+                    color='#283c54',
+                    )   
+                ),
+
+        secondary_y=False
+        )
+    
+    fig.add_trace(        
+        go.Bar( y=sales_per_month,
+                x=plot_data_final['date'],
+                base='relative',
+                name='Vendas',
+                orientation='v',
+                marker=dict(
+                    color='#289c84',
+                ) 
+            ),
+        secondary_y=False
+    )
+
     fig.add_trace(
         go.Scatter(
             x=df['date'],
             y=df['proporcao'],
             mode='lines+markers',
-            name='Proporção (%)',
+            name='Razão(%)',
             marker=dict(
                 color='#FF0000'
-            ),
+           ),
             line=dict(
                 color='#FF0000'
             )
-        )
+        ),
+        secondary_y=True
     )
 
     fig.update_layout(
-font=dict(
+        font=dict(
             color='#283c54',
             family='Roboto'
         ),
@@ -261,27 +292,41 @@ font=dict(
             )
         ),
         yaxis=dict(
-        tickfont=dict(
-            size=15,
-            color='#283c54'
-        ),
-        title=dict(
-            text='Quantidade de Imóveis',
-            font=dict(
-                size=25,
+            tickfont=dict(
+                size=15,
                 color='#283c54'
-                )
+            ),
+            title=dict(
+                text='Quantidade de Imóveis',
+                font=dict(
+                    size=25,
+                    color='#283c54'
+                    )
             )
+        ),
+        yaxis2=dict(
+            tickfont=dict(
+                size=15,
+                color='#283c54'
+            ),
+            title=dict(
+                text='Razão(%)',
+                font=dict(
+                    size=20,
+                    color='#283c54'
+                    )
+            ),
+            range=[0, 100]
         ),
         legend=dict(
             font=dict(
                 size=20,
                 color='#283c54',
             ),
+            
         ),
         bargap=0.1,
         showlegend=True,
-        width=800,
         height=500,
         plot_bgcolor='#d8e4e4',
         paper_bgcolor='#d8e4e4',
@@ -295,7 +340,24 @@ font=dict(
         )
     )
 
+    fig.update_yaxes(showgrid=False, secondary_y=True)
     fig.update_traces(hovertemplate='%{y}<extra></extra>')
+
+    fig.add_shape(
+        # Rectangle with reference to the plot
+            type="rect",
+            xref="paper",
+            yref="paper",
+            x0=-0.145,
+            y0=-0.23,
+            x1=1.277,
+            y1=1.28,
+            line=dict(
+                color="black",
+                 width=1,
+             )
+         )
+
 
     # Exibir o gráfico
     st.plotly_chart(fig)
@@ -328,18 +390,20 @@ with fig_col2:
         ),
         yaxis=dict(
         tickfont=dict(
+            color='#283c54',
             size=15
         ),
         title=dict(
             text='Quantidade de Imóveis',
             font=dict(
+                color='#283c54',
                 size=25
                 )
             )
         ),
         bargap=0.1,
         showlegend=False,
-        width=200,
+        # width=200,
         height=500,
         plot_bgcolor='#d8e4e4',
         paper_bgcolor='#d8e4e4',
@@ -355,15 +419,34 @@ with fig_col2:
     )
 
     fig.update_traces(hovertemplate='Quantidade de imóveis: %{y}<extra></extra>')
+
+    print(max(fig.data[0]))
     
     # Adicionando a legenda com a quantidade de imóveis
     total_imoveis = len(imoveis_a_venda)
     fig.add_annotation(
-        x=max(imoveis_a_venda['precoVenda'])*0.5,
-        y=max(fig.data[0]),
+        x=max(imoveis_a_venda['precoVenda'])*0.9,
+        yref='paper',
+        y=1.1,
+        showarrow=False,
         text=f'Total de Imóveis: {total_imoveis}',
-        font=dict(size=30)
+        font=dict(size=30, color='#283c54')
     )
+
+    fig.add_shape(
+        # Rectangle with reference to the plot
+            type="rect",
+            xref="paper",
+            yref="paper",
+            x0=-0.08,
+            y0=-0.2,
+            x1=1,
+            y1=1.15,
+            line=dict(
+                color="black",
+                 width=1,
+             )
+         )
 
     # Exibir o gráfico interativo
     st.plotly_chart(fig, theme='streamlit', use_container_width=True)
@@ -588,6 +671,21 @@ with fig_col1:
 
     fig.update_traces(hovertemplate='Quantidade de Leads: %{x}<extra></extra>')
 
+    fig.add_shape(
+    # Rectangle with reference to the plot
+        type="rect",
+        xref="paper",
+        yref="paper",
+        x0=-0.23,
+        y0=-0.2,
+        x1=1,
+        y1=1.15,
+        line=dict(
+            color="black",
+                width=1,
+            )
+        )
+
     st.plotly_chart(fig, theme='streamlit', use_container_width=True)
 
 with fig_col2:
@@ -640,6 +738,21 @@ with fig_col2:
 
     fig.update_traces(textposition='inside', textfont_size=20, hovertemplate='Quantidade de Leads: %{value}<extra></extra>')
 
+    fig.add_shape(
+        # Rectangle with reference to the plot
+            type="rect",
+            xref="paper",
+            yref="paper",
+            x0=0,
+            y0=-0.2,
+            x1=1.242,
+            y1=1.15,
+            line=dict(
+                color="black",
+                    width=1,
+                )
+            )
+
     st.plotly_chart(fig, theme='streamlit', use_container_width=True)
     
 with fig_col3:
@@ -669,8 +782,8 @@ with fig_col3:
     fig = go.Figure(go.Funnel(
     y = data['number'],
     x = data['stage'],
-    textinfo = "value+percent initial",
-    marker = {"color": funil_cores}
+    textinfo = "label+percent initial",
+    marker = {"color": funil_cores},
     ))
 
     fig.update_layout(
@@ -678,12 +791,9 @@ with fig_col3:
             color='#283c54',
             family='Roboto'
         ),
-        # yaxis=dict(
-        #     tickfont=dict(
-        #         color='#283c54',
-        #         size=20
-        #     ),
-        # ),
+        yaxis=dict(
+            showticklabels=False  
+        ),
         plot_bgcolor='#d8e4e4',
         paper_bgcolor='#d8e4e4',
         width=800,
@@ -697,7 +807,22 @@ with fig_col3:
         ),
     )
 
-    fig.update_traces(textposition='inside', textfont_size=25, hovertemplate='%{y}<extra></extra>')
+    fig.update_traces(textposition='inside', textfont_size=25, hovertemplate='Quantidade: %{x}<extra></extra>')
+
+    fig.add_shape(
+            # Rectangle with reference to the plot
+                type="rect",
+                xref="paper",
+                yref="paper",
+                x0=0.01,
+                y0=-0.2,
+                x1=1,
+                y1=1.15,
+                line=dict(
+                    color="black",
+                        width=1,
+                    )
+                )
 
     st.plotly_chart(fig, theme='streamlit', use_container_width=True)
     
