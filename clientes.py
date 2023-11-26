@@ -274,6 +274,7 @@ with fig_col1:
     )
 
     fig.update_layout(
+        
         font=dict(
             color='#283c54',
             family='Roboto'
