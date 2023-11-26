@@ -285,7 +285,7 @@ with fig_col1:
         size=15
         ),
         title=dict(
-            text='Preço de Venda (R$)',
+            text='Meses',
             font=dict(
                 color='#283c54',
                 size=25
