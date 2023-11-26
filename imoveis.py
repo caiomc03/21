@@ -129,13 +129,13 @@ imoveis_para_alugar_parados = imoveis_para_alugar[(imoveis_para_alugar['alugado'
 # Função para simplificar o número
 def simplify_number(num):
     if num >= 1e9:
-        return f'R$ {num / 1e9:.2f}B'
+        return f'R${num / 1e9:.2f} Bilhões'
     elif num >= 1e6:
-        return f'R$ {num / 1e6:.2f}M'
+        return f'R${num / 1e6:.2f} Milhões'
     elif num >= 1e3:
-        return f'R$ {num / 1e3:.2f}K'
+        return f'R${num / 1e3:.2f} Mil'
     else:
-        return f'R$ {num:.2f}'
+        return f'R${num:.2f}'
 
 # # read csv from a URL
 # @st.cache_data
@@ -202,6 +202,20 @@ with fig_col1:
         )
     )
 
+    fig.add_shape(
+    type="rect",
+    xref="paper",
+    yref="paper",
+    x0=0,
+    y0=-0.17,
+    x1=1.3,
+    y1=1.3,
+    line=dict(
+        color="black",
+        width=1,
+    )
+    )
+
     st.plotly_chart(fig, theme= 'streamlit', use_container_width= True)
 
 with fig_col2:
@@ -255,11 +269,27 @@ with fig_col2:
         )
     )
 
+    fig.add_shape(
+    type="rect",
+    xref="paper",
+    yref="paper",
+    x0=0,
+    y0=-0.17,
+    x1=1.25 ,
+    y1=1.3,
+    line=dict(
+        color="black",
+        width=1,
+    )
+    )
+
     st.plotly_chart(fig, theme= 'streamlit', use_container_width= True) 
 
 with fig_col3:
     
     st.markdown("### :grey[Imóveis Disponíveis em Anúncio]")
+
+    
     
     # Then, we calculate the counts for each category.
     disponiveis_para_venda = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Casa'])
@@ -288,6 +318,20 @@ with fig_col3:
     )
 
     fig.update_traces(hovertemplate='%{value}%<extra></extra>', textfont_size=25)
+
+    fig.add_shape(
+    type="rect",
+    xref="paper",
+    yref="paper",
+    x0=0,
+    y0=-0.17,
+    x1=1.2,
+    y1=1.3,
+    line=dict(
+        color="black",
+        width=1,
+    )
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -367,7 +411,7 @@ fig.update_layout(
             ),
     ),
     yaxis=dict(
-        title_text="Soma das Vendas (em Milhões de R$)",
+        title_text="Soma das Vendas",
         tickfont=dict(
             size=15,
             color='#283c54'
@@ -402,10 +446,10 @@ fig.add_shape(
     type="rect",
     xref="paper",
     yref="paper",
-    x0=-0.145,
-    y0=-0.23,
-    x1=1.277,
-    y1=1.28,
+    x0=-0.052,
+    y0=-0.17,
+    x1=1.07,
+    y1=1.1,
     line=dict(
         color="black",
         width=1,
@@ -431,7 +475,7 @@ with fig_col1:
     total_previous_quarter_sales = vendas_por_quarter.get(previous_quarter, 0)
 
     # Simplificar o valor das vendas atuais para exibição
-    simplified_current_sales = f'R$ {total_current_quarter_sales / 1000000:.1f} Milhões'
+    simplified_current_sales = simplify_number(total_current_quarter_sales)
 
     # Calcular a diferença proporcional entre o quarter atual e o anterior
     if total_previous_quarter_sales > 0:
@@ -439,18 +483,22 @@ with fig_col1:
     else:
         proportional_difference = np.inf  # Aumento infinito se não houve vendas no quarter anterior
 
-    # Formatar a diferença proporcional
     if proportional_difference == np.inf:
         proportional_difference_str = "Infinity"  # Sem vendas no quarter anterior
     else:
         proportional_difference_str = f'{proportional_difference:.1f}%'
         if proportional_difference > 0:
-            proportional_difference_str = '+' + proportional_difference_str  # Adicionando sinal de '+' para diferenças positivas
-
+            proportional_difference_str = f'\u2191 {proportional_difference_str}'  # Up arrow for positive difference
+            color = '#00ff00'
+        elif proportional_difference < 0:
+            proportional_difference_str = f' \u2193 {proportional_difference_str[1:]}'  # Down arrow for negative difference
+            color = '#ff0000'
+        
     # Plotando o gráfico
     fig, ax = plt.subplots()
     plt.text(0.5, 0.6, simplified_current_sales, ha='center', va='center', fontsize=18, color='#283c54', fontweight='bold')
-    plt.text(0.5, 0.4, f'{proportional_difference_str} com Relação ao Quarter Passado', ha='center', va='center', fontsize=14, color='red')
+    
+    plt.text(0.5, 0.4, proportional_difference_str, ha='center', va='center', fontsize=14, color=color)
     plt.axis('off')
     fig.patch.set_facecolor('#d8e4e4')
     fig.set_linewidth(4)
