@@ -420,8 +420,6 @@ with fig_col2:
     )
 
     fig.update_traces(hovertemplate='Quantidade de imóveis: %{y}<extra></extra>')
-
-    print(max(fig.data[0]))
     
     # Adicionando a legenda com a quantidade de imóveis
     total_imoveis = len(imoveis_a_venda)
