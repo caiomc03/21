@@ -9,6 +9,10 @@ import pandas as pd  # read csv, df manipulation
 import plotly.express as px  # interactive charts
 import streamlit as st  #  data web app development
 from faker import Faker
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+
 
 
 st.set_page_config(
@@ -125,13 +129,13 @@ imoveis_para_alugar_parados = imoveis_para_alugar[(imoveis_para_alugar['alugado'
 # Função para simplificar o número
 def simplify_number(num):
     if num >= 1e9:
-        return f'R$ {num / 1e9:.2f}B'
+        return f'R${num / 1e9:.2f} Bilhões'
     elif num >= 1e6:
-        return f'R$ {num / 1e6:.2f}M'
+        return f'R${num / 1e6:.2f} Milhões'
     elif num >= 1e3:
-        return f'R$ {num / 1e3:.2f}K'
+        return f'R${num / 1e3:.2f} Mil'
     else:
-        return f'R$ {num:.2f}'
+        return f'R${num:.2f}'
 
 # # read csv from a URL
 # @st.cache_data
@@ -147,41 +151,72 @@ fig_col1, fig_col2, fig_col3= st.columns(3)
 #Primeira linha do dashboard
 
 with fig_col1:
-    st.markdown("### :grey[Imoveis a venda]")
+    st.markdown('### :grey[Imóveis à Venda]')
    
     # Calculating the total number of properties and the percentage of those that are sold
     total_properties = len(imoveis_para_venda)
     sold_properties = imoveis['vendido'].sum()
-    percent_sold = (sold_properties / total_properties) * 100
+    percent_sold = ((sold_properties / total_properties) * 100).round(1)
 
-    # Data to plot
+   # Data for the plot
     labels = ['Vendido', 'Disponível']
-    data = [percent_sold, 100-percent_sold]
+    values = [percent_sold, 100-percent_sold]
     colors = ['#283c54', '#9ba8a8']
-    
 
-    # Plotting the data
-    fig, ax = plt.subplots()
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(5)
-    ax.pie(x=data, explode=None, labels=labels, colors=colors, startangle=180)
+    # Create the pie chart
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.6, marker_colors=colors)])
 
-    # Creating a doughnut chart by setting a circle at the center again
-    circle = plt.Circle((0,0), 0.70, color='#d8e4e4')
+    # Update the layout
+    fig.update_layout(
+        legend=dict(
+            itemsizing='constant',
+            font=dict(
+                color='#283c54',
+                size=20
+            )
+            ),
+        showlegend=True,
+        paper_bgcolor='#d8e4e4',
+        plot_bgcolor='#d8e4e4',
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
 
-    fig.gca().add_artist(circle)  # Adding the white circle in the middle
-    fig.patch.set_facecolor('#d8e4e4')
 
-    # Moving the legend to the bottom right corner
-    plt.legend(labels=['Vendido: ' + str(sold_properties), 'Disponível: ' + str(total_properties - sold_properties)],
-            title='Imóveis à venda: ' + str(total_properties),
-            loc='upper right')
+    )
+    #### Alterar Legenda
+    fig.update_traces(hovertemplate='%{value}%<extra></extra>', textinfo='none')
 
-    plt.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
-    plt.annotate('{:.2f}%'.format(percent_sold), (-0.2, 0), fontsize=16, fontweight='bold')
+    fig.add_annotation(
+        x=0.5,
+        y=0.5,
+        text=f'{percent_sold.round(1)}%',
+        showarrow=False,
+        font=dict(
+            size=30,
+            color='#283c54'
+        )
+    )
 
-    st.pyplot(fig)
+    fig.add_shape(
+    type="rect",
+    xref="paper",
+    yref="paper",
+    x0=0,
+    y0=-0.17,
+    x1=1.3,
+    y1=1.3,
+    line=dict(
+        color="black",
+        width=1,
+    )
+    )
+
+    st.plotly_chart(fig, theme= 'streamlit', use_container_width= True)
 
 with fig_col2:
     st.markdown("### :grey[Imoveis Alugados]")
@@ -189,129 +224,240 @@ with fig_col2:
     # Calculating the total number of properties and the percentage of those that are sold
     total_properties = len(imoveis_para_alugar)
     rent_properties = imoveis['alugado'].sum()
-    percent_rent = (rent_properties / total_properties) * 100
+    percent_rent = ((rent_properties / total_properties) * 100).round(1)
 
     # Data to plot
     labels = ['Alugado', 'Vago']
     data = [percent_rent, 100-percent_rent]
-    colors = ['#289c84', '#9ba8a8']   
+    colors = ['#289c84', '#9ba8a8']
 
-    # Plotting the data
-    fig, ax = plt.subplots()
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(5)
-    ax.pie(x=data, explode=None, labels=labels, colors=colors,startangle=180, )
-    fig.patch.set_facecolor('#d8e4e4')
+    # Create the pie chart
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.6, marker_colors=colors)])
 
-    # Creating a doughnut chart by setting a circle at the center again
-    circle = plt.Circle((0,0), 0.70, color='#d8e4e4')
+    # Update the layout
+    fig.update_layout(
+        legend=dict(
+            itemsizing='constant',
+            font=dict(
+                color='#283c54',
+                size=20
+            )
+        ),
+        showlegend=True,
+        paper_bgcolor='#d8e4e4',
+        plot_bgcolor='#d8e4e4',
+        hoverlabel=dict(
+            bgcolor='#283c54',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
 
-    fig.gca().add_artist(circle)  # Adding the white circle in the middle
+    )
+    #### Alterar Legenda
+    fig.update_traces(hovertemplate='%{value}%<extra></extra>', textinfo='none')
 
-    # Moving the legend to the bottom right corner
-    plt.legend(labels=['Alugado: ' + str(rent_properties), 'Vago: ' + str(total_properties - rent_properties)], 
-            title='Imóveis para aluguel : ' + str(total_properties),
-            loc='upper right')
+    fig.add_annotation(
+    x=0.5,
+    y=0.5,
+    text=f'{percent_rent.round(1)}%',
+    showarrow=False,
+    font=dict(
+        size=30,
+        color='#283c54'
+        )
+    )
 
-    plt.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
-    plt.annotate('{:.2f}%'.format(percent_rent), (-0.2,0), fontsize=16, fontweight='bold')
+    fig.add_shape(
+    type="rect",
+    xref="paper",
+    yref="paper",
+    x0=0,
+    y0=-0.17,
+    x1=1.25 ,
+    y1=1.3,
+    line=dict(
+        color="black",
+        width=1,
+    )
+    )
 
-    st.pyplot(fig)  
+    st.plotly_chart(fig, theme= 'streamlit', use_container_width= True) 
 
 with fig_col3:
-    st.markdown("### :grey[Disponibilidade de Imóveis]")
-   
+    
+    st.markdown("### :grey[Imóveis Disponíveis em Anúncio]")
+
+    
+    
     # Then, we calculate the counts for each category.
     disponiveis_para_venda = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Casa'])
     disponiveis_para_alugar = len(imoveis_nao_vendidos_nem_alugados[imoveis_nao_vendidos_nem_alugados['tipo'] == 'Apartamento'])
     disponiveis_total = disponiveis_para_venda + disponiveis_para_alugar
-    # Now we create the pie chart data.
-    labels = ['Disponíveis para Venda', 'Disponíveis para Alugar']
-    sizes = [disponiveis_para_venda, disponiveis_para_alugar]
-    colors = ['#283c54','#289c84']  
+    # Dados para o gráfico
+    labels = ['Venda', 'Alugar']
+    values = [disponiveis_para_venda, disponiveis_para_alugar]
+    colors = ['#283c54', '#289c84']  # Azul escuro para venda, Verde para alugar
 
-    # Plotting the pie chart.
-    fig, ax = plt.subplots()
-    fig.patch.set_facecolor('#d8e4e4')
-    fig.set_linewidth(4)
-    fig.set_edgecolor('#283c54')
-    fig.set_figheight(4.85)
-    ax.pie(sizes, labels=labels, colors=colors,startangle=180)
-    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    # Criando o gráfico de pizza
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, marker_colors=colors)])
 
-    # Moving the legend to the bottom right corner
-    plt.legend(labels=[f'Alugar: {disponiveis_para_alugar}',f'Vender: {disponiveis_para_venda}'], 
-            title='Propoção de imóveis\n disponíveis',
-            loc='upper left')
-    
-    plt.annotate('{:.2f}%'.format(disponiveis_para_alugar/disponiveis_total*100), (-0.2,0.4), fontsize=16, fontweight='bold')
-    plt.annotate('{:.2f}%'.format(disponiveis_para_venda/disponiveis_total*100), (-0.2,-0.4), fontsize=16, fontweight='bold')
+    # Atualizando o layout
+    fig.update_layout(
+        legend=dict(
+            itemsizing='constant',
+            font=dict(
+                color='#283c54',
+                size=20
+            )
+            ),
+        showlegend=True,
+        paper_bgcolor='#d8e4e4',
+        plot_bgcolor='#d8e4e4'
+    )
 
-    st.pyplot(fig)
+    fig.update_traces(hovertemplate='%{value}%<extra></extra>', textfont_size=25)
+
+    fig.add_shape(
+    type="rect",
+    xref="paper",
+    yref="paper",
+    x0=0,
+    y0=-0.17,
+    x1=1.2,
+    y1=1.3,
+    line=dict(
+        color="black",
+        width=1,
+    )
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
 
 #=================================================================================================
 #Segunda linha do dashboard
+fig_col1 = st.columns(1)
+
 
 st.markdown("### :grey[Vendas ao longo do ano]")
+
+# Dados
 monthly_sales = imoveis[imoveis['vendido'] == 1].groupby(imoveis['sold_date'].dt.to_period('M'))['precoVenda'].sum().reset_index()
 monthly_sales['sold_date'] = monthly_sales['sold_date'].dt.to_timestamp()
 
-# Ajustar o DataFrame de metas para começar a partir do primeiro mês das vendas
+# Ajustar o DataFrame de metas
 first_month_of_sales = monthly_sales['sold_date'].min()
 target_months = pd.date_range(start=first_month_of_sales, periods=len(monthly_sales), freq='MS')
-target_values = [1000000 + 500000 * i for i in range(len(target_months))]
-target_df = pd.DataFrame({'Month': target_months, 'Target': target_values})
+target_values = [10000000 + 10000000 * randint(0,10) for _ in range(len(target_months))]
 
-    # Adjusting the target data to start from the first month of the sales data
-# and setting the y-axis to show integer values
+# Criar o DataFrame das metas
+target_df = pd.DataFrame({
+    'Month': target_months,
+    'Target': target_values
+})
 
-# Get the first month of sales from the sales data
-first_month_of_sales = monthly_sales['sold_date'].min()
+# Criar subplot com eixo secundário
+fig = px.bar(
+    data_frame=monthly_sales,
+    x='sold_date',
+    y='precoVenda',
+    color_discrete_sequence=['#283c54', '#289c84'],
+)
 
-# Generate the target months starting from the first month of sales
-target_months = pd.date_range(start=first_month_of_sales, periods=len(target_months), freq='MS')
 
-# Generate target values starting from 1 million
-target_values = [10000000 + 10000000 * randint(0,10) for i in range(len(target_months))]
+fig.add_trace(
+    go.Scatter(
+        x=target_df['Month'],
+        y=target_df['Target'],
+        marker=dict(
+            symbol='circle',
+            color='#289c84',
+            size=10,
+        ),
+        mode='lines+markers',
+        name='Meta',
+        line=dict(
+            color='#289c84',
+            width=4
+        ),
+        # hovertemplate='%{y:$,.0f}<extra></extra>',
+        hoverlabel=dict(
+            bgcolor='#289c84',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
+    ),
+)
+fig.update_traces(hovertemplate='%{y:$,.0f}<extra></extra>')
 
-# Create the target DataFrame
-target_df = pd.DataFrame({'Month': target_months, 'Target': target_values})
+# Atualizar layout do gráfico
+fig.update_layout(
+    font=dict(
+        family="Roboto",
+        color="#283c54",
+    ),
+    xaxis=dict(
+        title_text="Meses",
+        tickfont=dict(
+            size=15,
+            color="#283c54"
+            ),
+        title_font=dict(
+            size=25,
+            color='#283c54'
+            ),
+    ),
+    yaxis=dict(
+        title_text="Soma das Vendas",
+        tickfont=dict(
+            size=15,
+            color='#283c54'
+            ),
+        title_font=dict(
+            size=25,
+            color='#283c54'
+            ),
+    ),
+    legend=dict(
+        itemsizing='constant',
+        font=dict(
+            color="#283c54",
+            size=20
+        )
+    ),
+    bargap=0.1,
+    plot_bgcolor="#d8e4e4",
+    paper_bgcolor="#d8e4e4",
+    showlegend=True,
+    height=500,
+    width=1800,
+    hoverlabel=dict(
+        bgcolor="#283c54",
+        font=dict(color="#ffffff"),
+        bordercolor="#289c84"
+    )
+)
 
-# Plot the bar chart for monthly sales and line chart for monthly targets
-fig, ax =plt.subplots()
-fig.patch.set_facecolor('#d8e4e4')
-fig.set_linewidth(4)
-fig.set_edgecolor('#283c54')
-fig.set_figwidth(15)
+# Adicionar borda ao gráfico
+fig.add_shape(
+    type="rect",
+    xref="paper",
+    yref="paper",
+    x0=-0.052,
+    y0=-0.17,
+    x1=1.07,
+    y1=1.1,
+    line=dict(
+        color="black",
+        width=1,
+    )
+)
 
-# Bar chart for monthly sales
-ax.bar(monthly_sales['sold_date'], monthly_sales['precoVenda'], width=20, label='Soma das Vendas', color='#283c54')
-
-# Line chart for the targets
-plt.plot(target_df['Month'], target_df['Target'], marker='o', linestyle='-', label='Metas Mensais', color='#289c84')
-
-# Set title and labels
-# plt.title('Soma das Vendas Mensais x Metas Mensais')
-plt.ylabel('Soma das Vendas (em Milhoes de R$)')
-
-# Rotate x-axis labels for better readability
-plt.xticks(rotation=45)
-ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
-
-# Set y-axis to have integer values only
-ax = plt.gca()
-ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x/1000000))))
-
-# Show legend
-plt.legend(labels=[f'Metas Mensais',f'Soma das Vendas'], 
-        loc='lower right')
-
-# Show grid on y axes only
-plt.grid(axis='y', alpha=0.5, linestyle='--')
-
-st.pyplot(fig)
-
+# Exibir o gráfico no Streamlit
+st.plotly_chart(fig)
 #=================================================================================================
 #Terceira linha do dashboard
 fig_col1, fig_col2= st.columns(2)
@@ -329,7 +475,7 @@ with fig_col1:
     total_previous_quarter_sales = vendas_por_quarter.get(previous_quarter, 0)
 
     # Simplificar o valor das vendas atuais para exibição
-    simplified_current_sales = f'R$ {total_current_quarter_sales / 1000000:.1f} Milhões'
+    simplified_current_sales = simplify_number(total_current_quarter_sales)
 
     # Calcular a diferença proporcional entre o quarter atual e o anterior
     if total_previous_quarter_sales > 0:
@@ -337,22 +483,21 @@ with fig_col1:
     else:
         proportional_difference = np.inf  # Aumento infinito se não houve vendas no quarter anterior
 
-    # Formatar a diferença proporcional
     if proportional_difference == np.inf:
         proportional_difference_str = "Infinity"  # Sem vendas no quarter anterior
     else:
         proportional_difference_str = f'{proportional_difference:.1f}%'
         if proportional_difference > 0:
-            proportional_difference_str = '+' + proportional_difference_str  # Adicionando sinal de '+' para diferenças positivas
-
+            proportional_difference_str = f'\u2191 {proportional_difference_str}'  # Up arrow for positive difference
+            color = '#00ff00'
+        elif proportional_difference < 0:
+            proportional_difference_str = f' \u2193 {proportional_difference_str[1:]}'  # Down arrow for negative difference
+            color = '#ff0000'
+        
     # Plotando o gráfico
     fig, ax = plt.subplots()
     plt.text(0.5, 0.6, simplified_current_sales, ha='center', va='center', fontsize=18, color='#283c54', fontweight='bold')
-   
-    plt.text(0.5, 0.4, f' ↓ {proportional_difference_str} ', ha='center', va='center', fontsize=14, color='red')
-    
-
-
+    plt.text(0.5, 0.4, f'{proportional_difference_str} com Relação ao Quarter Passado', ha='center', va='center', fontsize=14, color='red')
     plt.axis('off')
     fig.patch.set_facecolor('#d8e4e4')
     fig.set_linewidth(4)
