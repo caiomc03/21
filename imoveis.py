@@ -166,10 +166,7 @@ with fig_col1:
 
     # Update the layout
     fig.update_layout(
-        # title_text='Total de Imóveis: ' + str(total_properties),
-        annotations=[dict(text=f'{percent_sold:.2f}%', x=0.5, y=0.5, font_size=16, showarrow=False)],
         legend=dict(
-            title='Legenda',
             itemsizing='constant',
             font=dict(
                 color='#283c54',
