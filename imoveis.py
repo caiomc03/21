@@ -314,25 +314,11 @@ target_df = pd.DataFrame({
 })
 
 # Criar subplot com eixo secundário
-fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-# Adicionar vendas ao gráfico
-fig.add_trace(
-    go.Bar(x=monthly_sales['sold_date'],
-           y=monthly_sales['precoVenda'],
-           name='Soma das Vendas',
-           marker=dict(color='#283c54')),
-    secondary_y=False,
-)
-
-# Adicionar metas ao gráfico
-fig.add_trace(
-    go.Scatter(x=target_df['Month'],
-               y=target_df['Target'],
-               mode='lines+markers',
-               name='Metas Mensais',
-               line=dict(color='#289c84')),
-    secondary_y=True,
+fig = px.bar(
+    data_frame=monthly_sales,
+    x='sold_date',
+    y='precoVenda',
+    color_continuous_scale=['#283c54', '#289c84'],
 )
 
 # Atualizar layout do gráfico
