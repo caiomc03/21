@@ -182,7 +182,7 @@ with fig_col1:
 
     )
     #### Alterar Legenda
-    fig.update_traces(hovertemplate='%{x}')
+    fig.update_traces(hovertemplate='%{value}')
 
     st.plotly_chart(fig, theme= 'streamlit', use_container_width= True)
 
