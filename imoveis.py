@@ -10,6 +10,8 @@ import plotly.express as px  # interactive charts
 import streamlit as st  #  data web app development
 from faker import Faker
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
 
 
 
@@ -202,7 +204,6 @@ with fig_col1:
 
     st.plotly_chart(fig, theme= 'streamlit', use_container_width= True)
 
-
 with fig_col2:
     st.markdown("### :grey[Imoveis Alugados]")
 
@@ -292,66 +293,99 @@ with fig_col3:
 
 #=================================================================================================
 #Segunda linha do dashboard
+fig_col1 = st.columns(1)
+
 
 st.markdown("### :grey[Vendas ao longo do ano]")
+
+# Dados
 monthly_sales = imoveis[imoveis['vendido'] == 1].groupby(imoveis['sold_date'].dt.to_period('M'))['precoVenda'].sum().reset_index()
 monthly_sales['sold_date'] = monthly_sales['sold_date'].dt.to_timestamp()
 
-# Ajustar o DataFrame de metas para começar a partir do primeiro mês das vendas
+# Ajustar o DataFrame de metas
 first_month_of_sales = monthly_sales['sold_date'].min()
 target_months = pd.date_range(start=first_month_of_sales, periods=len(monthly_sales), freq='MS')
-target_values = [1000000 + 500000 * i for i in range(len(target_months))]
-target_df = pd.DataFrame({'Month': target_months, 'Target': target_values})
+target_values = [10000000 + 10000000 * randint(0,10) for _ in range(len(target_months))]
 
-    # Adjusting the target data to start from the first month of the sales data
-# and setting the y-axis to show integer values
+# Criar o DataFrame das metas
+target_df = pd.DataFrame({
+    'Month': target_months,
+    'Target': target_values
+})
 
-# Get the first month of sales from the sales data
-first_month_of_sales = monthly_sales['sold_date'].min()
+# Criar subplot com eixo secundário
+fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-# Generate the target months starting from the first month of sales
-target_months = pd.date_range(start=first_month_of_sales, periods=len(target_months), freq='MS')
+# Adicionar vendas ao gráfico
+fig.add_trace(
+    go.Bar(x=monthly_sales['sold_date'],
+           y=monthly_sales['precoVenda'],
+           name='Soma das Vendas',
+           marker=dict(color='#283c54')),
+    secondary_y=False,
+)
 
-# Generate target values starting from 1 million
-target_values = [10000000 + 10000000 * randint(0,10) for i in range(len(target_months))]
+# Adicionar metas ao gráfico
+fig.add_trace(
+    go.Scatter(x=target_df['Month'],
+               y=target_df['Target'],
+               mode='lines+markers',
+               name='Metas Mensais',
+               line=dict(color='#289c84')),
+    secondary_y=True,
+)
 
-# Create the target DataFrame
-target_df = pd.DataFrame({'Month': target_months, 'Target': target_values})
+# Atualizar layout do gráfico
+fig.update_layout(
+    font=dict(
+        family="Roboto",
+        color="#283c54",
+    ),
+    xaxis=dict(
+        title_text="Meses",
+        tickfont=dict(size=15),
+        title_font=dict(size=25),
+    ),
+    yaxis=dict(
+        title_text="Soma das Vendas (em Milhões de R$)",
+        tickfont=dict(size=15),
+        title_font=dict(size=25),
+    ),
+    yaxis2=dict(
+        title_text="Metas Mensais",
+        title_font=dict(size=20),
+        tickfont=dict(size=15),
+        range=[0, max(target_values) * 1.1]  # 10% acima do valor mais alto para melhor visualização
+    ),
+    bargap=0.1,
+    plot_bgcolor="#d8e4e4",
+    paper_bgcolor="#d8e4e4",
+    showlegend=True,
+    height=500,
+    hoverlabel=dict(
+        bgcolor="#283c54",
+        font=dict(color="#ffffff"),
+        bordercolor="#289c84"
+    )
+)
 
-# Plot the bar chart for monthly sales and line chart for monthly targets
-fig, ax =plt.subplots()
-fig.patch.set_facecolor('#d8e4e4')
-fig.set_linewidth(4)
-fig.set_edgecolor('#283c54')
-fig.set_figwidth(15)
+# Adicionar borda ao gráfico
+fig.add_shape(
+    type="rect",
+    xref="paper",
+    yref="paper",
+    x0=-0.145,
+    y0=-0.23,
+    x1=1.277,
+    y1=1.28,
+    line=dict(
+        color="black",
+        width=1,
+    )
+)
 
-# Bar chart for monthly sales
-ax.bar(monthly_sales['sold_date'], monthly_sales['precoVenda'], width=20, label='Soma das Vendas', color='#283c54')
-
-# Line chart for the targets
-plt.plot(target_df['Month'], target_df['Target'], marker='o', linestyle='-', label='Metas Mensais', color='#289c84')
-
-# Set title and labels
-# plt.title('Soma das Vendas Mensais x Metas Mensais')
-plt.ylabel('Soma das Vendas (em Milhões de R$)')
-
-# Rotate x-axis labels for better readability
-plt.xticks(rotation=45)
-ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
-
-# Set y-axis to have integer values only
-ax = plt.gca()
-ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x/1000000))))
-
-# Show legend
-plt.legend(labels=[f'Metas Mensais',f'Soma das Vendas'], 
-        loc='lower right')
-
-# Show grid on y axes only
-plt.grid(axis='y', alpha=0.5, linestyle='--')
-
-st.pyplot(fig)
-
+# Exibir o gráfico no Streamlit
+st.plotly_chart(fig)
 #=================================================================================================
 #Terceira linha do dashboard
 fig_col1, fig_col2= st.columns(2)
