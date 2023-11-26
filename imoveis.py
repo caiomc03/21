@@ -318,8 +318,36 @@ fig = px.bar(
     data_frame=monthly_sales,
     x='sold_date',
     y='precoVenda',
-    color_continuous_scale=['#283c54', '#289c84'],
+    color_discrete_sequence=['#283c54', '#289c84'],
 )
+
+
+fig.add_trace(
+    go.Scatter(
+        x=target_df['Month'],
+        y=target_df['Target'],
+        marker=dict(
+            symbol='circle',
+            color='#289c84',
+            size=10,
+        ),
+        mode='lines+markers',
+        name='Meta',
+        line=dict(
+            color='#289c84',
+            width=4
+        ),
+        # hovertemplate='%{y:$,.0f}<extra></extra>',
+        hoverlabel=dict(
+            bgcolor='#289c84',
+            font=dict(
+                color='#ffffff'
+            ),
+            bordercolor='#289c84'
+        ),
+    ),
+)
+fig.update_traces(hovertemplate='%{y:$,.0f}<extra></extra>')
 
 # Atualizar layout do gráfico
 fig.update_layout(
@@ -329,25 +357,39 @@ fig.update_layout(
     ),
     xaxis=dict(
         title_text="Meses",
-        tickfont=dict(size=15),
-        title_font=dict(size=25),
+        tickfont=dict(
+            size=15,
+            color="#283c54"
+            ),
+        title_font=dict(
+            size=25,
+            color='#283c54'
+            ),
     ),
     yaxis=dict(
         title_text="Soma das Vendas (em Milhões de R$)",
-        tickfont=dict(size=15),
-        title_font=dict(size=25),
+        tickfont=dict(
+            size=15,
+            color='#283c54'
+            ),
+        title_font=dict(
+            size=25,
+            color='#283c54'
+            ),
     ),
-    yaxis2=dict(
-        title_text="Metas Mensais",
-        title_font=dict(size=20),
-        tickfont=dict(size=15),
-        range=[0, max(target_values) * 1.1]  # 10% acima do valor mais alto para melhor visualização
+    legend=dict(
+        itemsizing='constant',
+        font=dict(
+            color="#283c54",
+            size=20
+        )
     ),
     bargap=0.1,
     plot_bgcolor="#d8e4e4",
     paper_bgcolor="#d8e4e4",
     showlegend=True,
     height=500,
+    width=1800,
     hoverlabel=dict(
         bgcolor="#283c54",
         font=dict(color="#ffffff"),
