@@ -162,13 +162,20 @@ with fig_col1:
     colors = ['#283c54', '#9ba8a8']
 
     # Create the pie chart
-    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.7, marker_colors=colors)])
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.6, marker_colors=colors)])
 
     # Update the layout
     fig.update_layout(
         # title_text='Total de Imóveis: ' + str(total_properties),
         annotations=[dict(text=f'{percent_sold:.2f}%', x=0.5, y=0.5, font_size=16, showarrow=False)],
-        legend=dict(title='Legenda', itemsizing='constant'),
+        legend=dict(
+            title='Legenda',
+            itemsizing='constant',
+            font=dict(
+                color='#283c54',
+                size=20
+            )
+            ),
         showlegend=True,
         paper_bgcolor='#d8e4e4',
         plot_bgcolor='#d8e4e4',
@@ -180,9 +187,21 @@ with fig_col1:
             bordercolor='#289c84'
         ),
 
+
     )
     #### Alterar Legenda
-    fig.update_traces(hovertemplate='%{value}')
+    fig.update_traces(hovertemplate='%{value}%<extra></extra>', textinfo='none')
+
+    fig.add_annotation(
+        x=0.5,
+        y=0.5,
+        text=f'{percent_sold.round(1)}%',
+        showarrow=False,
+        font=dict(
+            size=30,
+            color='#283c54'
+        )
+    )
 
     st.plotly_chart(fig, theme= 'streamlit', use_container_width= True)
 
@@ -197,17 +216,22 @@ with fig_col2:
 
     # Data to plot
     labels = ['Alugado', 'Vago']
-    data = [percent_rent, 100-percent_rent]
+    values = [percent_rent, 100-percent_rent]
     colors = ['#289c84', '#9ba8a8']   # Gold for sold, Light blue for available
 
     # Create the pie chart
-    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.7, marker_colors=colors)])
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.6, marker_colors=colors)])
 
     # Update the layout
     fig.update_layout(
-        # title_text='Total de Imóveis: ' + str(total_properties),
-        annotations=[dict(text=f'{percent_sold:.2f}%', x=0.5, y=0.5, font_size=16, showarrow=False)],
-        legend=dict(title='Legenda', itemsizing='constant'),
+        legend=dict(
+            title='Legenda',
+            itemsizing='constant',
+            font=dict(
+                color='#283c54',
+                size=20
+            )
+        ),
         showlegend=True,
         paper_bgcolor='#d8e4e4',
         plot_bgcolor='#d8e4e4',
@@ -221,7 +245,18 @@ with fig_col2:
 
     )
     #### Alterar Legenda
-    fig.update_traces(hovertemplate='%{x}')
+    fig.update_traces(hovertemplate='%{value}%<extra></extra>', textinfo='none')
+
+    fig.add_annotation(
+    x=0.5,
+    y=0.5,
+    text=f'{percent_rent.round(1)}%',
+    showarrow=False,
+    font=dict(
+        size=30,
+        color='#283c54'
+        )
+    )
 
     st.plotly_chart(fig, theme= 'streamlit', use_container_width= True) 
 
