@@ -333,7 +333,7 @@ plt.plot(target_df['Month'], target_df['Target'], marker='o', linestyle='-', lab
 
 # Set title and labels
 # plt.title('Soma das Vendas Mensais x Metas Mensais')
-plt.ylabel('Soma das Vendas (em Milhoes de R$)')
+plt.ylabel('Soma das Vendas (em Milhões de R$)')
 
 # Rotate x-axis labels for better readability
 plt.xticks(rotation=45)
